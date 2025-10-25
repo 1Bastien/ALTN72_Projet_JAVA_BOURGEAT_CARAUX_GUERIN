@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entité pour la visite
+ */
 @Entity
 @Getter
 @Setter

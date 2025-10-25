@@ -5,6 +5,9 @@ import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Classe embeddable pour les informations de la mission
+ */
 @Embeddable
 @Getter
 @Setter

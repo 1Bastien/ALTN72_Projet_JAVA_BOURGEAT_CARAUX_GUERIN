@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Entité pour l'utilisateur qui se connecte à l'application
+ */
 @Entity
 @Setter
 @Getter

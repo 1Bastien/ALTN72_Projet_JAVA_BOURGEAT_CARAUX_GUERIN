@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+/**
+ * Classe embeddable pour les informations du rapport
+ */
 @Embeddable
 @Getter
 @Setter

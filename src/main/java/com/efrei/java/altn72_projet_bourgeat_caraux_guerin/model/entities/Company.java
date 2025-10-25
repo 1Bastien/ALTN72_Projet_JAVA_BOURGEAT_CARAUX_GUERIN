@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * Entité pour l'entreprise
+ */
 @Entity
 @Getter
 @Setter

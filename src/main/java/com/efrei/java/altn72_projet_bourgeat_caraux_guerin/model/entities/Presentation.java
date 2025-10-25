@@ -8,6 +8,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Classe embeddable pour les informations de la présentation
+ */
 @Embeddable
 @Getter
 @Setter
