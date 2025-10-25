@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * Entité pour l'étudiant
+ */
 @Entity
 @Getter
 @Setter
@@ -20,12 +23,12 @@ public class Student {
     @Column(nullable = true, length = 50)
     private String firstName;
 
-    @Column(nullable = true, length = 50, unique = true)
+    @Column(nullable = false, length = 50, unique = true)
     private String email;
 
     @Column(nullable = true, length = 10)
-    private Integer phone;
+    private String phone;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SchoolYear> schoolYears;
 }

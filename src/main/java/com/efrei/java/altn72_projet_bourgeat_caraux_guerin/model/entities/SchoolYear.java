@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
 
+/**
+ * Entité pour l'année scolaire
+ */
 @Entity
 @Getter
 @Setter
@@ -40,17 +43,17 @@ public class SchoolYear {
     private Presentation presentation;
 
     @ManyToOne
-    @JoinColumn(name = "mentor_id", nullable = false)
+    @JoinColumn(name = "mentor_id", nullable = true)
     private Mentor mentor;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = true)
     private Company company;
 
     @OneToMany(mappedBy = "schoolYear", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Visit> visits;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 }
