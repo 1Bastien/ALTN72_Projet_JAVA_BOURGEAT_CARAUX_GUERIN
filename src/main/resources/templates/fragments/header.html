@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link th:href="@{/css/components/header.css}" rel="stylesheet" />
+  </head>
+  <body>
+    <header
+      th:fragment="main-header"
+      class="header navbar navbar-expand-lg navbar-dark mb-4 px-3 shadow-sm"
+    >
+      <div class="container-fluid px-3 py-1">
+        <div class="row w-100 align-items-center">
+          <div class="col-4">
+            <a class="navbar-brand" th:href="@{/}">
+              <img
+                th:src="@{/media/logo_asta.png}"
+                alt="Logo ASTA"
+                class="header__brand-img"
+              />
+              <span class="d-none d-sm-inline">ASTA</span>
+            </a>
+          </div>
+
+          <div class="col-4 d-flex justify-content-center">
+            <div class="position-relative" style="width: auto">
+              <div
+                class="badge bg-white text-dark border rounded-pill px-3 py-2 d-flex align-items-center gap-2 header__year-selector dropdown-toggle"
+                id="yearSelector"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                role="button"
+              >
+                <i class="fas fa-calendar-alt text-primary"></i>
+                <div class="d-flex flex-column lh-sm">
+                  <small
+                    class="text-uppercase fw-semibold opacity-75"
+                    style="font-size: 0.65rem; letter-spacing: 0.5px"
+                    >Année scolaire</small
+                  >
+                  <span
+                    class="fw-bold fs-6"
+                    id="selectedYear"
+                    th:text="${currentYear}"
+                  ></span>
+                </div>
+                <i class="fas fa-chevron-down small"></i>
+              </div>
+              <ul
+                class="dropdown-menu shadow-sm"
+                aria-labelledby="yearSelector"
+                id="yearDropdown"
+                style="min-width: 100%"
+              >
+                <li th:each="year : ${academicYears}">
+                  <a
+                    class="dropdown-item"
+                    href="javascript:void(0)"
+                    th:text="${year}"
+                    th:data-year="${year}"
+                  ></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-4 d-flex justify-content-end">
+            <div class="nav-item dropdown">
+              <button
+                class="btn btn-link nav-link p-0 text-white"
+                type="button"
+                id="userDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="fas fa-circle-user header__user-dropdown-icon"></i>
+              </button>
+              <ul
+                class="dropdown-menu dropdown-menu-end shadow-sm"
+                aria-labelledby="userDropdown"
+              >
+                <li>
+                  <a class="dropdown-item" href="#">
+                    <i class="fas fa-user me-2 text-primary"></i>Mon profil
+                  </a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">
+                    <i class="fas fa-sign-out-alt me-2 text-primary"></i
+                    >Déconnexion
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  </body>
+</html>

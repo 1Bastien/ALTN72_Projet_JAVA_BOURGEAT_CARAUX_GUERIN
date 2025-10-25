@@ -1,0 +1,68 @@
+/* Fonts */
+@font-face {
+    font-family: 'Font Awesome 6 Free';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('../fonts/fontawesome/webfonts/fa-regular-400.woff2') format('woff2'),
+        url('../fonts/fontawesome/webfonts/fa-regular-400.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Font Awesome 6 Free';
+    font-style: normal;
+    font-weight: 900;
+    font-display: block;
+    src: url('../fonts/fontawesome/webfonts/fa-solid-900.woff2') format('woff2'),
+        url('../fonts/fontawesome/webfonts/fa-solid-900.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Font Awesome 6 Brands';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('../fonts/fontawesome/webfonts/fa-brands-400.woff2') format('woff2'),
+        url('../fonts/fontawesome/webfonts/fa-brands-400.ttf') format('truetype');
+}
+
+.far,
+.fa-regular {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 400;
+}
+
+.fas,
+.fa-solid {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.fab,
+.fa-brands {
+    font-family: 'Font Awesome 6 Brands';
+    font-weight: 400;
+}
+
+:root {
+    --primary-color: #2A4B6A;
+    --accent-color: #00cbb7;
+    --secondary-color: #FFA500;
+    --text-color: #2D3748;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.navbar-brand {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+}

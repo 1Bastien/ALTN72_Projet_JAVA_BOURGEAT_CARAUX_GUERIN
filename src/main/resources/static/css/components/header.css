@@ -1,0 +1,60 @@
+.header {
+    background-color: var(--primary-color);
+}
+
+.header__brand-img {
+    height: 40px;
+    width: auto;
+}
+
+.header__nav-icon {
+    color: inherit;
+}
+
+.header .header__user-dropdown-icon {
+    font-size: 1.75rem !important;
+}
+
+.header__user-icon {
+    color: var(--primary-color);
+}
+
+.header__year-selector {
+    border-color: var(--accent-color) !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.header__year-selector:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(64, 224, 208, 0.4);
+}
+
+.header__year-selector:hover * {
+    color: white !important;
+}
+
+.header__year-selector+.dropdown-menu {
+    margin-top: 0.5rem;
+    min-width: 100%;
+    transform: none !important;
+    right: 0;
+    left: 0 !important;
+}
+
+.header__year-selector+.dropdown-menu .dropdown-item {
+    text-align: center;
+    padding: 0.5rem 1rem;
+}
+
+.header .nav-item.dropdown {
+    position: relative;
+    z-index: 1000;
+}
+
+.header .dropdown-menu-end {
+    right: 0;
+    left: auto;
+}

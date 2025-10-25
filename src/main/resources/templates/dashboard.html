@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Tableau de bord - Gestion des étudiants</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <link th:href="@{/fonts/fontawesome/css/all.min.css}" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/header :: main-header}"></div>
+
+    <div class="container">
+      <h1 class="text-primary mb-4">Mon tableau de bord</h1>
+
+      <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0 fs-5 text-center w-100">Liste des apprentis</h4>
+          <button type="button" class="btn btn-light add-btn shadow-sm position-absolute end-0 me-3" data-bs-toggle="modal" data-bs-target="#addStudentModal" title="Ajouter un étudiant">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      
+        <div class="card-body">
+          <div th:if="${academicYears.empty}" class="text-center py-5">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aucune année académique n'est disponible</h5>
+            <p class="text-muted">Veuillez ajouter une année académique pour commencer.</p>
+          </div>
+          
+          <div th:if="${!academicYears.empty}" class="table-responsive p-0">
+            <table class="table table-bordered table-hover mb-0 text-center align-middle">
+              <thead class="bg-light fw-bold">
+                <tr>
+                  <th class="py-3">Nom</th>
+                  <th class="py-3">Prénom</th>
+                  <th class="py-3">Email</th>
+                  <th class="py-3">Téléphone</th>
+                  <th class="py-3">Programme</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${students.empty}">
+                  <td colspan="5" class="text-center py-4 text-muted">
+                    <i class="fas fa-user-graduate fa-2x mb-3"></i>
+                    <p class="mb-0">Aucun étudiant n'est inscrit pour cette année académique</p>
+                  </td>
+                </tr>
+                <tr th:each="student : ${students}" th:unless="${students.empty}">
+                  <td class="py-3" th:text="${student.lastName}"></td>
+                  <td class="py-3" th:text="${student.firstName}"></td>
+                  <td class="py-3">
+                    <div class="d-flex justify-content-around align-items-center">
+                      <span th:text="${student.email ?: '-'}" class="me-2"></span>
+                      <a th:if="${student.email}" th:href="'mailto:' + ${student.email}" class="btn btn-sm btn-outline-primary" title="Envoyer un email">
+                        <i class="fas fa-envelope"></i>
+                      </a>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <div class="d-flex justify-content-around align-items-center">
+                      <span th:text="${student.phone != null ? '0' + student.phone : '-'}" class="me-2"></span>
+                      <a th:if="${student.phone}" th:href="'tel:0' + ${student.phone}" class="btn btn-sm btn-outline-primary" title="Appeler">
+                        <i class="fas fa-phone"></i>
+                      </a>
+                    </div>
+                  </td>
+                  <td class="py-3" th:text="${student.schoolYear != null ? student.schoolYear.program : '-'}"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    <div class="modal fade" 
+         id="addStudentModal" 
+         tabindex="-1" 
+         aria-labelledby="addStudentModalLabel" 
+         aria-hidden="true"
+         th:attr="data-bs-show=${showModal != null ? showModal : false},
+                 data-bs-backdrop=${showModal != null and showModal ? 'static' : 'true'},
+                 data-bs-keyboard=${showModal != null ? not showModal : true}">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addStudentModalLabel">Ajouter un étudiant</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body p-4">
+            <form th:action="@{/}" th:object="${newStudent}" method="post" class="needs-validation">
+              <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger mb-3">
+                <ul class="mb-0">
+                  <li th:each="err : ${#fields.allErrors()}" th:text="${err}"></li>
+                </ul>
+              </div>
+
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Nom</label>
+                <input type="text" 
+                       class="form-control" 
+                       th:field="*{lastName}" 
+                       th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'" 
+                       required 
+                       minlength="2" 
+                       maxlength="50"
+                       pattern="[A-Za-zÀ-ÿ\-' ]{2,50}"
+                       oninvalid="this.setCustomValidity('')"
+                       oninput="this.setCustomValidity('')"
+                       title="Le nom est requis et doit contenir entre 2 et 50 caractères (lettres, tirets, apostrophes et espaces uniquement)">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Erreur de validation</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="firstName" class="form-label">Prénom</label>
+                <input type="text" 
+                       class="form-control" 
+                       th:field="*{firstName}" 
+                       th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'" 
+                       required
+                       minlength="2"
+                       maxlength="50"
+                       pattern="[A-Za-zÀ-ÿ\-' ]{2,50}"
+                       oninvalid="this.setCustomValidity('')"
+                       oninput="this.setCustomValidity('')"
+                       title="Le prénom est requis et doit contenir entre 2 et 50 caractères (lettres, tirets, apostrophes et espaces uniquement)">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Erreur de validation</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" 
+                       class="form-control" 
+                       th:field="*{email}" 
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" 
+                       required
+                       pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                       oninvalid="this.setCustomValidity('')"
+                       oninput="this.setCustomValidity('')"
+                       title="L'email est requis et doit être une adresse email valide (exemple: nom@domaine.com)">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Erreur de validation</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="phone" class="form-label">Téléphone</label>
+                <input type="tel" 
+                       class="form-control" 
+                       th:field="*{phone}" 
+                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'" 
+                       pattern="^$|^\d{10}$"
+                       oninvalid="this.setCustomValidity('')"
+                       oninput="this.setCustomValidity('')"
+                       title="Le numéro de téléphone doit être vide ou contenir exactement 10 chiffres (exemple: 0612345678)">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Erreur de validation</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="academicYear" class="form-label">Année scolaire</label>
+                <select class="form-select" 
+                        th:field="*{schoolYear.academicYear}" 
+                        th:classappend="${#fields.hasErrors('schoolYear.academicYear')} ? 'is-invalid'" 
+                        required
+                        oninvalid="this.setCustomValidity('Veuillez sélectionner une année scolaire')"
+                        oninput="this.setCustomValidity('')"
+                        title="Veuillez sélectionner une année scolaire">
+                  <option th:each="year : ${#numbers.sequence(#dates.year(#dates.createNow()) - 5, #dates.year(#dates.createNow()) + 5)}"
+                          th:value="${year + '/' + (year + 1)}"
+                          th:text="${year + '/' + (year + 1)}">
+                  </option>
+                </select>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('schoolYear.academicYear')}" th:errors="*{schoolYear.academicYear}">Erreur de validation</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="program" class="form-label">Programme</label>
+                <select class="form-select" 
+                        th:field="*{schoolYear.program}" 
+                        th:classappend="${#fields.hasErrors('schoolYear.program')} ? 'is-invalid'" 
+                        required
+                        oninvalid="this.setCustomValidity('Veuillez sélectionner un programme')"
+                        oninput="this.setCustomValidity('')"
+                        title="Veuillez sélectionner un programme">
+                  <option value="" disabled>Choisissez un programme</option>
+                  <option th:each="prog : ${programs}"
+                          th:value="${prog}"
+                          th:text="${prog}">
+                  </option>
+                </select>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('schoolYear.program')}" th:errors="*{schoolYear.program}">Erreur de validation</div>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-user-plus me-2"></i>Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script th:src="@{/js/student-form.js}"></script>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/fonts/fontawesome/js/all.min.js}" defer></script>
+    <script th:src="@{/js/header.js}"></script>
+    <script th:src="@{/js/dashboard.js}"></script>
+  </body>
+</html>
