@@ -1,8 +1,10 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.StudentDTO;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.SchoolYear;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.Student;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.repository.StudentRepository;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.mapper.SchoolYearMapper;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.mapper.StudentMapper;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.StudentService;
 import org.slf4j.Logger;
@@ -22,11 +24,14 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
+    private final SchoolYearMapper schoolYearMapper;
 
     public StudentServiceImpl(StudentRepository studentRepository, 
-                            StudentMapper studentMapper) {
+                            StudentMapper studentMapper,
+                            SchoolYearMapper schoolYearMapper) {
         this.studentRepository = studentRepository;
         this.studentMapper = studentMapper;
+        this.schoolYearMapper = schoolYearMapper;
     }
 
     @Override
@@ -56,6 +61,17 @@ public class StudentServiceImpl implements StudentService {
     public StudentDTO saveStudent(StudentDTO studentDTO) {
         try {
             Student student = studentMapper.toEntity(studentDTO);
+            
+            if (studentDTO.getSchoolYears() != null && !studentDTO.getSchoolYears().isEmpty()) {
+                List<SchoolYear> schoolYears = studentDTO.getSchoolYears().stream()
+                    .map(schoolYearDTO -> {
+                        SchoolYear schoolYear = schoolYearMapper.toEntity(schoolYearDTO);
+                        schoolYear.setStudent(student);
+                        return schoolYear;
+                    })
+                    .toList();
+                student.setSchoolYears(schoolYears);
+            }
             
             Student savedStudent = studentRepository.save(student);
             

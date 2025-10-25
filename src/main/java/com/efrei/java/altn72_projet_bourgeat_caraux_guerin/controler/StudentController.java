@@ -2,6 +2,7 @@ package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.controler;
 
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.StudentDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.DashboardService;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.SchoolYearService;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.StudentService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.utils.AcademicYearUtils;
+
 /**
  * Contrôleur pour la gestion des étudiants
  */
@@ -27,10 +31,13 @@ public class StudentController {
 
     private final StudentService studentService;
     private final DashboardService dashboardService;
+    private final SchoolYearService schoolYearService;
 
-    public StudentController(StudentService studentService, DashboardService dashboardService) {
+
+    public StudentController(StudentService studentService, DashboardService dashboardService, SchoolYearService schoolYearService) {
         this.studentService = studentService;
         this.dashboardService = dashboardService;
+        this.schoolYearService = schoolYearService;
     }
 
     /**
@@ -40,8 +47,11 @@ public class StudentController {
      */
     @GetMapping
     public String getDashboard(Model model) {
-        dashboardService.prepareDashboardModel(model, null, false);
-        logger.info("Dashboard affiché");
+        List<String> academicYears = schoolYearService.getAllAcademicYears();
+        String closestYear = AcademicYearUtils.findClosestAcademicYear(academicYears);
+        
+        dashboardService.prepareDashboardModel(model, closestYear, false);
+        logger.info("Dashboard affiché avec l'année académique : {}", closestYear);
         return "dashboard";
     }
 

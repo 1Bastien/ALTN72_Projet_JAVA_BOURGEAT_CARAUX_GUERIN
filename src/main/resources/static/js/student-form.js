@@ -4,7 +4,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
   const yearSelect = document.querySelector(
-    'select[name="schoolYear.academicYear"]'
+    'select[name="schoolYears[0].academicYear"]'
   );
   if (yearSelect) {
     const currentYear = new Date().getFullYear();

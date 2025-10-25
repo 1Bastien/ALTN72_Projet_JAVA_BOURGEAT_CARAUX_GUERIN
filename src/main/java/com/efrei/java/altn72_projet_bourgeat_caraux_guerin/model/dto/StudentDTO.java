@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * DTO pour l'étudiant
  */
@@ -27,6 +29,6 @@ public class StudentDTO {
     @Pattern(regexp = "^$|^\\d{10}$", message = "Le numéro de téléphone doit contenir exactement 10 chiffres")
     private String phone;
 
-    @NotNull(message = "Les informations de l'année scolaire sont obligatoires")
-    private SchoolYearDTO schoolYear;
+    @NotNull(message = "Les informations des années scolaires sont obligatoires")
+    private List<SchoolYearDTO> schoolYears;
 }

@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.utils.AcademicYearUtils;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -26,7 +27,7 @@ public class DashboardServiceImpl implements DashboardService {
     public void prepareDashboardModel(Model model, String academicYear, boolean showModal) {
         List<String> academicYears = schoolYearService.getAllAcademicYears();
         String currentYear = academicYear != null ? academicYear : 
-            (academicYears.isEmpty() ? "" : academicYears.get(0));
+            AcademicYearUtils.findClosestAcademicYear(academicYears);
 
         model.addAttribute("newStudent", new StudentDTO());
         model.addAttribute("programs", Program.values());
@@ -41,7 +42,10 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public void prepareErrorModel(Model model, StudentDTO studentDTO, BindingResult result, String errorMessage) {
         List<String> academicYears = schoolYearService.getAllAcademicYears();
-        String currentYear = studentDTO.getSchoolYear().getAcademicYear();
+        String currentYear = (studentDTO.getSchoolYears() != null && !studentDTO.getSchoolYears().isEmpty() 
+            && studentDTO.getSchoolYears().get(0) != null && studentDTO.getSchoolYears().get(0).getAcademicYear() != null)
+            ? studentDTO.getSchoolYears().get(0).getAcademicYear()
+            : AcademicYearUtils.findClosestAcademicYear(academicYears);
 
         model.addAttribute("students", studentService.getStudentsForCurrentYear(currentYear));
         model.addAttribute("newStudent", studentDTO);
