@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Profil étudiant - Gestion des étudiants</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <link th:href="@{/fonts/fontawesome/css/all.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/pages/student-profile.css}" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/header :: main-header}"></div>
+
+    <div class="container">
+      <div class="mb-3">
+        <a th:href="@{/}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+        </a>
+      </div>
+
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-user-circle me-2"></i>Informations de l'étudiant
+          </h5>
+        </div>
+        <div class="card-body">
+          <form
+            th:action="@{/student/{id}/update-basic-info(id=${student.id})}"
+            method="post"
+          >
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName" class="form-label">Prénom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="firstName"
+                  name="firstName"
+                  maxlength="50"
+                  th:value="${student.firstName}"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Nom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="lastName"
+                  name="lastName"
+                  maxlength="50"
+                  required
+                  th:value="${student.lastName}"
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  maxlength="50"
+                  required
+                  th:value="${student.email}"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="phone" class="form-label">Téléphone</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="phone"
+                  name="phone"
+                  pattern="[0-9]{10}"
+                  maxlength="10"
+                  placeholder="0123456789"
+                  th:value="${student.phone}"
+                />
+                <small class="form-text text-muted"
+                  >Format : 10 chiffres sans espaces</small
+                >
+              </div>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Enregistrer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div
+        th:if="${schoolYear == null}"
+        class="alert alert-warning"
+        role="alert"
+      >
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Aucune donnée disponible pour cette année académique.
+      </div>
+
+      <div th:if="${schoolYear != null}">
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-info-circle me-2"></i>Informations générales
+            </h5>
+          </div>
+          <div class="card-body">
+            <form
+              th:action="@{/student/{id}/school-year/{syId}/update(id=${student.id}, syId=${schoolYear.id})}"
+              method="post"
+            >
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="program" class="form-label">Programme</label>
+                  <select
+                    class="form-select"
+                    id="program"
+                    name="program"
+                    required
+                  >
+                    <option value="">Sélectionner un programme</option>
+                    <option
+                      th:each="prog : ${programs}"
+                      th:value="${prog}"
+                      th:text="${prog}"
+                      th:selected="${schoolYear.program != null && schoolYear.program == prog}"
+                    ></option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="major" class="form-label">Spécialité</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="major"
+                    name="major"
+                    th:value="${schoolYear.major}"
+                  />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="company" class="form-label">Entreprise</label>
+                  <div class="input-group">
+                    <select class="form-select" id="company" name="companyId">
+                      <option value="">Sélectionner une entreprise</option>
+                      <option
+                        th:each="company : ${companies}"
+                        th:value="${company.id}"
+                        th:text="${company.companyName}"
+                        th:selected="${schoolYear.company != null && schoolYear.company.id == company.id}"
+                      ></option>
+                    </select>
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary"
+                      data-bs-toggle="modal"
+                      data-bs-target="#addCompanyModal"
+                      title="Ajouter une entreprise"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="mentor" class="form-label"
+                    >Maître d'apprentissage</label
+                  >
+                  <div class="input-group">
+                    <select class="form-select" id="mentor" name="mentorId">
+                      <option value="">
+                        Sélectionner un maître d'apprentissage
+                      </option>
+                      <option
+                        th:each="mentor : ${mentors}"
+                        th:value="${mentor.id}"
+                        th:text="${mentor.firstName + ' ' + mentor.lastName + ' (' + mentor.companyName + ')'}"
+                        th:data-company-id="${mentor.companyId}"
+                        th:selected="${schoolYear.mentor != null && schoolYear.mentor.id == mentor.id}"
+                      ></option>
+                    </select>
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary"
+                      data-bs-toggle="modal"
+                      data-bs-target="#addMentorModal"
+                      title="Ajouter un maître d'apprentissage"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <h6 class="mt-4 mb-3">
+                <i class="fas fa-briefcase me-2"></i>Mission
+              </h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="missionKeywords" class="form-label"
+                    >Mots-clés</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="missionKeywords"
+                    name="missionKeywords"
+                    th:value="${schoolYear.mission != null ? schoolYear.mission.keywords : ''}"
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="missionTargetJob" class="form-label"
+                    >Métier visé</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="missionTargetJob"
+                    name="missionTargetJob"
+                    th:value="${schoolYear.mission != null ? schoolYear.mission.targetJob : ''}"
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="missionComment" class="form-label"
+                  >Commentaire mission</label
+                >
+                <textarea
+                  class="form-control"
+                  id="missionComment"
+                  name="missionComment"
+                  rows="3"
+                  th:text="${schoolYear.mission != null ? schoolYear.mission.comment : ''}"
+                ></textarea>
+              </div>
+
+              <h6 class="mt-4 mb-3">
+                <i class="fas fa-comments me-2"></i>Commentaires et feedback
+              </h6>
+              <div class="mb-3">
+                <label for="comment" class="form-label">Commentaire</label>
+                <textarea
+                  class="form-control"
+                  id="comment"
+                  name="comment"
+                  rows="3"
+                  th:text="${schoolYear.comment}"
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="feedback" class="form-label">Feedback</label>
+                <textarea
+                  class="form-control"
+                  id="feedback"
+                  name="feedback"
+                  rows="3"
+                  th:text="${schoolYear.feedback}"
+                ></textarea>
+              </div>
+
+              <h6 class="mt-4 mb-3">
+                <i class="fas fa-file-alt me-2"></i>Rapport
+              </h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="reportSubject" class="form-label">Sujet</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="reportSubject"
+                    name="reportSubject"
+                    maxlength="100"
+                    th:value="${schoolYear.report != null ? schoolYear.report.subject : ''}"
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="reportGrade" class="form-label">Note</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="reportGrade"
+                    name="reportGrade"
+                    step="0.01"
+                    min="0"
+                    max="20"
+                    th:value="${schoolYear.report != null ? schoolYear.report.reportGrade : ''}"
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="reportComment" class="form-label"
+                  >Commentaire rapport</label
+                >
+                <textarea
+                  class="form-control"
+                  id="reportComment"
+                  name="reportComment"
+                  rows="3"
+                  maxlength="500"
+                  th:text="${schoolYear.report != null ? schoolYear.report.comment : ''}"
+                ></textarea>
+              </div>
+
+              <h6 class="mt-4 mb-3">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Présentation
+              </h6>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="presentationDate" class="form-label">Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="presentationDate"
+                    name="presentationDate"
+                    th:value="${schoolYear.presentation != null && schoolYear.presentation.date != null ? #temporals.format(schoolYear.presentation.date, 'yyyy-MM-dd') : ''}"
+                  />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="presentationTime" class="form-label">Heure</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="presentationTime"
+                    name="presentationTime"
+                    th:value="${schoolYear.presentation != null && schoolYear.presentation.date != null ? #temporals.format(schoolYear.presentation.date, 'HH:mm') : ''}"
+                  />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="presentationGrade" class="form-label">Note</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="presentationGrade"
+                    name="presentationGrade"
+                    step="0.01"
+                    min="0"
+                    max="20"
+                    th:value="${schoolYear.presentation != null ? schoolYear.presentation.presentationGrade : ''}"
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="presentationComment" class="form-label"
+                  >Commentaire présentation</label
+                >
+                <textarea
+                  class="form-control"
+                  id="presentationComment"
+                  name="presentationComment"
+                  rows="3"
+                  maxlength="500"
+                  th:text="${schoolYear.presentation != null ? schoolYear.presentation.comment : ''}"
+                ></textarea>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Visites -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div
+            class="card-header bg-light d-flex justify-content-between align-items-center"
+          >
+            <h5 class="card-title mb-0">
+              <i class="fas fa-calendar-check me-2"></i>Visites
+            </h5>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              data-bs-toggle="modal"
+              data-bs-target="#addVisitModal"
+            >
+              <i class="fas fa-plus me-2"></i>Ajouter une visite
+            </button>
+          </div>
+          <div class="card-body">
+            <div th:if="${visits.empty}" class="text-center py-4 text-muted">
+              <i class="fas fa-calendar-times fa-3x mb-3"></i>
+              <p class="mb-0">Aucune visite enregistrée pour cette année</p>
+            </div>
+
+            <div th:unless="${visits.empty}" class="table-responsive">
+              <table class="table table-bordered table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Format</th>
+                    <th>Commentaire</th>
+                    <th class="text-center" style="width: 150px">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="visit : ${visits}">
+                    <td
+                      th:text="${#temporals.format(visit.date, 'dd/MM/yyyy HH:mm')}"
+                    >
+                      01/01/2024 14:00
+                    </td>
+                    <td>
+                      <span
+                        class="badge"
+                        th:classappend="${visit.format.name() == 'IN_PERSON' ? 'bg-success' : 'bg-info'}"
+                        th:text="${visit.format.name() == 'IN_PERSON' ? 'Présentiel' : 'En ligne'}"
+                      >
+                      </span>
+                    </td>
+                    <td th:text="${visit.comment ?: '-'}">Commentaire</td>
+                    <td class="text-center">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary me-1 edit-visit-btn"
+                        th:data-visit-id="${visit.id}"
+                        th:data-visit-date="${#temporals.format(visit.date, 'yyyy-MM-dd')}"
+                        th:data-visit-time="${#temporals.format(visit.date, 'HH:mm')}"
+                        th:data-visit-format="${visit.format}"
+                        th:data-visit-comment="${visit.comment ?: ''}"
+                        title="Modifier"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <form
+                        th:action="@{/student/{id}/visit/{visitId}/delete(id=${student.id}, visitId=${visit.id})}"
+                        method="post"
+                        style="display: inline"
+                        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette visite ?');"
+                      >
+                        <button
+                          type="submit"
+                          class="btn btn-sm btn-outline-danger"
+                          title="Supprimer"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Ajouter une entreprise -->
+    <div
+      class="modal fade"
+      id="addCompanyModal"
+      tabindex="-1"
+      aria-labelledby="addCompanyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addCompanyModalLabel">
+              Ajouter une entreprise
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form
+              th:action="@{/student/{id}/company/create(id=${student.id})}"
+              method="post"
+            >
+              <div class="mb-3">
+                <label for="companyName" class="form-label"
+                  >Nom de l'entreprise</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="companyName"
+                  name="companyName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="address" class="form-label">Adresse</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="address"
+                  name="address"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="accessInformation" class="form-label"
+                  >Informations d'accès</label
+                >
+                <textarea
+                  class="form-control"
+                  id="accessInformation"
+                  name="accessInformation"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus me-2"></i>Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Ajouter un maître d'apprentissage -->
+    <div
+      class="modal fade"
+      id="addMentorModal"
+      tabindex="-1"
+      aria-labelledby="addMentorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addMentorModalLabel">
+              Ajouter un maître d'apprentissage
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form
+              th:action="@{/student/{id}/mentor/create(id=${student.id})}"
+              method="post"
+            >
+              <div class="mb-3">
+                <label for="mentorCompany" class="form-label">Entreprise</label>
+                <select
+                  class="form-select"
+                  id="mentorCompany"
+                  name="companyId"
+                  required
+                >
+                  <option value="">Sélectionner une entreprise</option>
+                  <option
+                    th:each="company : ${companies}"
+                    th:value="${company.id}"
+                    th:text="${company.companyName}"
+                  ></option>
+                </select>
+                <small class="form-text text-muted"
+                  >Vous devez d'abord créer une entreprise si elle n'existe
+                  pas</small
+                >
+              </div>
+              <div class="mb-3">
+                <label for="mentorLastName" class="form-label">Nom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mentorLastName"
+                  name="lastName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorFirstName" class="form-label">Prénom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mentorFirstName"
+                  name="firstName"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorJobTitle" class="form-label">Poste</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mentorJobTitle"
+                  name="jobTitle"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorEmail" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="mentorEmail"
+                  name="email"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorPhone" class="form-label">Téléphone</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="mentorPhone"
+                  name="phone"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorComment" class="form-label"
+                  >Commentaire</label
+                >
+                <textarea
+                  class="form-control"
+                  id="mentorComment"
+                  name="comment"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus me-2"></i>Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="addVisitModal"
+      tabindex="-1"
+      aria-labelledby="addVisitModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addVisitModalLabel">
+              Ajouter une visite
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form
+              th:action="@{/student/{id}/visit/create(id=${student.id})}"
+              method="post"
+              onsubmit="return combineDateTime('visitDate', 'visitTime', 'visitDateTimeInput')"
+            >
+              <input
+                type="hidden"
+                name="schoolYearId"
+                th:value="${schoolYear != null ? schoolYear.id : ''}"
+              />
+              <input type="hidden" id="visitDateTimeInput" name="date" />
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="visitDate" class="form-label">Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="visitDate"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="visitTime" class="form-label">Heure</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="visitTime"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="visitFormat" class="form-label">Format</label>
+                <select
+                  class="form-select"
+                  id="visitFormat"
+                  name="format"
+                  required
+                >
+                  <option value="">Sélectionner un format</option>
+                  <option
+                    th:each="format : ${formats}"
+                    th:value="${format}"
+                    th:text="${format.name() == 'IN_PERSON' ? 'Présentiel' : 'En ligne'}"
+                  ></option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="visitComment" class="form-label">Commentaire</label>
+                <textarea
+                  class="form-control"
+                  id="visitComment"
+                  name="comment"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus me-2"></i>Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="editVisitModal"
+      tabindex="-1"
+      aria-labelledby="editVisitModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editVisitModalLabel">
+              Modifier une visite
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form
+              id="editVisitForm"
+              method="post"
+              onsubmit="return combineDateTime('editVisitDate', 'editVisitTime', 'editVisitDateTimeInput')"
+            >
+              <input type="hidden" id="editVisitDateTimeInput" name="date" />
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="editVisitDate" class="form-label">Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="editVisitDate"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="editVisitTime" class="form-label">Heure</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="editVisitTime"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="editVisitFormat" class="form-label">Format</label>
+                <select
+                  class="form-select"
+                  id="editVisitFormat"
+                  name="format"
+                  required
+                >
+                  <option value="">Sélectionner un format</option>
+                  <option
+                    th:each="format : ${formats}"
+                    th:value="${format}"
+                    th:text="${format.name() == 'IN_PERSON' ? 'Présentiel' : 'En ligne'}"
+                  ></option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="editVisitComment" class="form-label"
+                  >Commentaire</label
+                >
+                <textarea
+                  class="form-control"
+                  id="editVisitComment"
+                  name="comment"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-2"></i>Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+      var studentId = /*[[${student.id}]]*/ null;
+    </script>
+
+    <div th:replace="~{fragments/search-modal :: search-modal}"></div>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/fonts/fontawesome/js/all.min.js}" defer></script>
+    <script th:src="@{/js/header.js}"></script>
+    <script th:src="@{/js/student-profile.js}"></script>
+    <script th:src="@{/js/search.js}"></script>
+  </body>
+</html>
