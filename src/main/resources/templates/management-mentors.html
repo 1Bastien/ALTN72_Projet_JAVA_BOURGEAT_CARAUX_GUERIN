@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Gestion des maîtres d'apprentissage</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <link th:href="@{/fonts/fontawesome/css/all.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/pages/student-profile.css}" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/header :: main-header}"></div>
+
+    <div class="container">
+      <div class="mb-3">
+        <a th:href="@{/}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+        </a>
+      </div>
+
+      <h1 class="text-primary mb-4">Gestion des maîtres d'apprentissage</h1>
+
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-4">
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="card-title mb-0">
+            <i class="fas fa-user-tie me-2"></i>Liste des maîtres
+            d'apprentissage
+          </h5>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#addMentorModal"
+          >
+            <i class="fas fa-plus me-2"></i>Ajouter un maître d'apprentissage
+          </button>
+        </div>
+        <div class="card-body">
+          <div th:if="${mentors.empty}" class="text-center py-4 text-muted">
+            <i class="fas fa-user-tie fa-3x mb-3"></i>
+            <p class="mb-0">Aucun maître d'apprentissage enregistré</p>
+          </div>
+
+          <div th:unless="${mentors.empty}" class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Entreprise</th>
+                  <th>Poste</th>
+                  <th>Email</th>
+                  <th>Téléphone</th>
+                  <th>Commentaire</th>
+                  <th class="text-center" style="width: 150px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="mentor : ${mentors}">
+                  <td th:text="${mentor.lastName}">Nom</td>
+                  <td th:text="${mentor.firstName ?: '-'}">Prénom</td>
+                  <td th:text="${mentor.companyName}">Entreprise</td>
+                  <td th:text="${mentor.jobTitle ?: '-'}">Poste</td>
+                  <td th:text="${mentor.email ?: '-'}">Email</td>
+                  <td th:text="${mentor.phone ?: '-'}">Téléphone</td>
+                  <td th:text="${mentor.comment ?: '-'}">Commentaire</td>
+                  <td class="text-center">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary me-1 edit-mentor-btn"
+                      th:data-mentor-id="${mentor.id}"
+                      th:data-mentor-lastname="${mentor.lastName}"
+                      th:data-mentor-firstname="${mentor.firstName ?: ''}"
+                      th:data-mentor-jobtitle="${mentor.jobTitle ?: ''}"
+                      th:data-mentor-email="${mentor.email ?: ''}"
+                      th:data-mentor-phone="${mentor.phone ?: ''}"
+                      th:data-mentor-comment="${mentor.comment ?: ''}"
+                      th:data-mentor-company="${mentor.companyId}"
+                      title="Modifier"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <form
+                      th:action="@{/management/mentors/{id}/delete(id=${mentor.id})}"
+                      method="post"
+                      style="display: inline"
+                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce maître d\'apprentissage ?');"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Supprimer"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="addMentorModal"
+      tabindex="-1"
+      aria-labelledby="addMentorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addMentorModalLabel">
+              Ajouter un maître d'apprentissage
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form th:action="@{/management/mentors/create}" method="post">
+              <div class="mb-3">
+                <label for="mentorCompany" class="form-label">Entreprise</label>
+                <select
+                  class="form-select"
+                  id="mentorCompany"
+                  name="companyId"
+                  required
+                >
+                  <option value="">Sélectionner une entreprise</option>
+                  <option
+                    th:each="company : ${companies}"
+                    th:value="${company.id}"
+                    th:text="${company.companyName}"
+                  ></option>
+                </select>
+                <small class="form-text text-muted"
+                  >Vous devez d'abord créer une entreprise si elle n'existe
+                  pas</small
+                >
+              </div>
+              <div class="mb-3">
+                <label for="mentorLastName" class="form-label">Nom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mentorLastName"
+                  name="lastName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorFirstName" class="form-label">Prénom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mentorFirstName"
+                  name="firstName"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorJobTitle" class="form-label">Poste</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mentorJobTitle"
+                  name="jobTitle"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorEmail" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="mentorEmail"
+                  name="email"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorPhone" class="form-label">Téléphone</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="mentorPhone"
+                  name="phone"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="mentorComment" class="form-label"
+                  >Commentaire</label
+                >
+                <textarea
+                  class="form-control"
+                  id="mentorComment"
+                  name="comment"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus me-2"></i>Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="editMentorModal"
+      tabindex="-1"
+      aria-labelledby="editMentorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editMentorModalLabel">
+              Modifier un maître d'apprentissage
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="editMentorForm" method="post">
+              <div class="mb-3">
+                <label for="editMentorCompany" class="form-label"
+                  >Entreprise</label
+                >
+                <select
+                  class="form-select"
+                  id="editMentorCompany"
+                  name="companyId"
+                  required
+                >
+                  <option value="">Sélectionner une entreprise</option>
+                  <option
+                    th:each="company : ${companies}"
+                    th:value="${company.id}"
+                    th:text="${company.companyName}"
+                  ></option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="editMentorLastName" class="form-label">Nom</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editMentorLastName"
+                  name="lastName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editMentorFirstName" class="form-label"
+                  >Prénom</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editMentorFirstName"
+                  name="firstName"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editMentorJobTitle" class="form-label">Poste</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editMentorJobTitle"
+                  name="jobTitle"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editMentorEmail" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="editMentorEmail"
+                  name="email"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editMentorPhone" class="form-label"
+                  >Téléphone</label
+                >
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="editMentorPhone"
+                  name="phone"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editMentorComment" class="form-label"
+                  >Commentaire</label
+                >
+                <textarea
+                  class="form-control"
+                  id="editMentorComment"
+                  name="comment"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-2"></i>Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll(".edit-mentor-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const mentorId = this.getAttribute("data-mentor-id");
+          const lastName = this.getAttribute("data-mentor-lastname");
+          const firstName = this.getAttribute("data-mentor-firstname");
+          const jobTitle = this.getAttribute("data-mentor-jobtitle");
+          const email = this.getAttribute("data-mentor-email");
+          const phone = this.getAttribute("data-mentor-phone");
+          const comment = this.getAttribute("data-mentor-comment");
+          const companyId = this.getAttribute("data-mentor-company");
+
+          const editModal = new bootstrap.Modal(
+            document.getElementById("editMentorModal")
+          );
+          const editForm = document.getElementById("editMentorForm");
+
+          editForm.action = `/management/mentors/${mentorId}/update`;
+          document.getElementById("editMentorLastName").value = lastName;
+          document.getElementById("editMentorFirstName").value = firstName;
+          document.getElementById("editMentorJobTitle").value = jobTitle;
+          document.getElementById("editMentorEmail").value = email;
+          document.getElementById("editMentorPhone").value = phone;
+          document.getElementById("editMentorComment").value = comment;
+          document.getElementById("editMentorCompany").value = companyId;
+
+          editModal.show();
+        });
+      });
+    </script>
+
+    <div th:replace="~{fragments/search-modal :: search-modal}"></div>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/fonts/fontawesome/js/all.min.js}" defer></script>
+    <script th:src="@{/js/search.js}"></script>
+  </body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Gestion des entreprises</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
+      rel="stylesheet"
+    />
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <link th:href="@{/fonts/fontawesome/css/all.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/pages/student-profile.css}" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/header :: main-header}"></div>
+
+    <div class="container">
+      <div class="mb-3">
+        <a th:href="@{/}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+        </a>
+      </div>
+
+      <h1 class="text-primary mb-4">Gestion des entreprises</h1>
+
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-4">
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="card-title mb-0">
+            <i class="fas fa-building me-2"></i>Liste des entreprises
+          </h5>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#addCompanyModal"
+          >
+            <i class="fas fa-plus me-2"></i>Ajouter une entreprise
+          </button>
+        </div>
+        <div class="card-body">
+          <div th:if="${companies.empty}" class="text-center py-4 text-muted">
+            <i class="fas fa-building fa-3x mb-3"></i>
+            <p class="mb-0">Aucune entreprise enregistrée</p>
+          </div>
+
+          <div th:unless="${companies.empty}" class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Nom</th>
+                  <th>Adresse</th>
+                  <th>Informations d'accès</th>
+                  <th class="text-center" style="width: 150px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="company : ${companies}">
+                  <td th:text="${company.companyName}">Nom entreprise</td>
+                  <td th:text="${company.address}">Adresse</td>
+                  <td th:text="${company.accessInformation ?: '-'}">Info</td>
+                  <td class="text-center">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary me-1 edit-company-btn"
+                      th:data-company-id="${company.id}"
+                      th:data-company-name="${company.companyName}"
+                      th:data-company-address="${company.address}"
+                      th:data-company-access="${company.accessInformation ?: ''}"
+                      title="Modifier"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <form
+                      th:action="@{/management/companies/{id}/delete(id=${company.id})}"
+                      method="post"
+                      style="display: inline"
+                      onsubmit="return confirm('ATTENTION : La suppression de cette entreprise entraînera la suppression de tous les maîtres d\'apprentissage et des données des années scolaires associées. Voulez-vous vraiment continuer ?');"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Supprimer"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="addCompanyModal"
+      tabindex="-1"
+      aria-labelledby="addCompanyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="addCompanyModalLabel">
+              Ajouter une entreprise
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form th:action="@{/management/companies/create}" method="post">
+              <div class="mb-3">
+                <label for="companyName" class="form-label"
+                  >Nom de l'entreprise</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="companyName"
+                  name="companyName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="address" class="form-label">Adresse</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="address"
+                  name="address"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="accessInformation" class="form-label"
+                  >Informations d'accès</label
+                >
+                <textarea
+                  class="form-control"
+                  id="accessInformation"
+                  name="accessInformation"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus me-2"></i>Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="editCompanyModal"
+      tabindex="-1"
+      aria-labelledby="editCompanyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editCompanyModalLabel">
+              Modifier une entreprise
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="editCompanyForm" method="post">
+              <div class="mb-3">
+                <label for="editCompanyName" class="form-label"
+                  >Nom de l'entreprise</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCompanyName"
+                  name="companyName"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editAddress" class="form-label">Adresse</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editAddress"
+                  name="address"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="editAccessInformation" class="form-label"
+                  >Informations d'accès</label
+                >
+                <textarea
+                  class="form-control"
+                  id="editAccessInformation"
+                  name="accessInformation"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-2"></i>Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll(".edit-company-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const companyId = this.getAttribute("data-company-id");
+          const companyName = this.getAttribute("data-company-name");
+          const address = this.getAttribute("data-company-address");
+          const accessInfo = this.getAttribute("data-company-access");
+
+          const editModal = new bootstrap.Modal(
+            document.getElementById("editCompanyModal")
+          );
+          const editForm = document.getElementById("editCompanyForm");
+
+          editForm.action = `/management/companies/${companyId}/update`;
+          document.getElementById("editCompanyName").value = companyName;
+          document.getElementById("editAddress").value = address;
+          document.getElementById("editAccessInformation").value = accessInfo;
+
+          editModal.show();
+        });
+      });
+    </script>
+
+    <div th:replace="~{fragments/search-modal :: search-modal}"></div>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/fonts/fontawesome/js/all.min.js}" defer></script>
+    <script th:src="@{/js/search.js}"></script>
+  </body>
+</html>
