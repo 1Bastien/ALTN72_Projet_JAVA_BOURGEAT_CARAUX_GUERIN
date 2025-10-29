@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Classe embeddable pour les informations de la présentation
+ * Classe embeddable pour les informations de la présentation,
+ * cette classe sera dans la classe SchoolYear dans la base de données.
  */
 @Embeddable
 @Getter

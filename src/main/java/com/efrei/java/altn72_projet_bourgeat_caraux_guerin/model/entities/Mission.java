@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Classe embeddable pour les informations de la mission
+ * Classe embeddable pour les informations de la mission,
+ * cette classe sera dans la classe SchoolYear dans la base de données.
  */
 @Embeddable
 @Getter

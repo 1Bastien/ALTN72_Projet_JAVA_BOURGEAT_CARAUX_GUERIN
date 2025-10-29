@@ -28,7 +28,7 @@ public class Mentor {
     private String email;
 
     @Column(nullable = true, length = 10)
-    private Integer phone;
+    private String phone;
 
     @Column(nullable = true, length = 500)
     private String comment;

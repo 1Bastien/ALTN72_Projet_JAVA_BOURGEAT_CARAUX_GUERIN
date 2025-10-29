@@ -29,6 +29,9 @@ public class Student {
     @Column(nullable = true, length = 10)
     private String phone;
 
+    @Column(nullable = true, length = 10)
+    private Boolean isArchived;
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SchoolYear> schoolYears;
 }

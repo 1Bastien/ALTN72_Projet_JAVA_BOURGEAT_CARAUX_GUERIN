@@ -8,7 +8,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 /**
- * Classe embeddable pour les informations du rapport
+ * Classe embeddable pour les informations du rapport,
+ * cette classe sera dans la classe SchoolYear dans la base de données.
  */
 @Embeddable
 @Getter
