@@ -28,6 +28,7 @@ public interface StudentMapper {
      */
     @Mapping(target = "schoolYears", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isArchived", ignore = true)
     Student toEntity(StudentDTO studentDTO);
 
     /**
