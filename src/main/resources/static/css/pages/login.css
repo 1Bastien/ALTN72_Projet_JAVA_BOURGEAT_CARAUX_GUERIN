@@ -1,0 +1,21 @@
+body.login-page {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #3a5f7d 100%);
+}
+
+.card-header-custom {
+    background: var(--primary-color);
+}
+
+.btn-primary-custom {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    border: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary-custom:hover {
+    background-color: #36c0b2;
+    border-color: #36c0b2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 203, 183, 0.4);
+}
