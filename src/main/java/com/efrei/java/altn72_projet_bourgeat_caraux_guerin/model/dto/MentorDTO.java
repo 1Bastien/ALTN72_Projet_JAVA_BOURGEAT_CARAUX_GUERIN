@@ -8,31 +8,38 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
- * DTO pour l'étudiant
+ * DTO pour le maître d'apprentissage
  */
 @Getter
-@Setter     
-public class StudentDTO {
+@Setter
+public class MentorDTO {
 
     private Long id;
+
+    @NotBlank(message = "Le nom est obligatoire")
+    @Size(max = 50, message = "Le nom doit contenir maximum 50 caractères")
+    private String lastName;
 
     @Size(max = 50, message = "Le prénom doit contenir maximum 50 caractères")
     private String firstName;
 
-    @Size(min = 2, max = 50, message = "Le nom doit contenir entre 2 et 50 caractères")
-    @NotBlank(message = "Le nom est obligatoire")
-    private String lastName;
+    @Size(max = 100, message = "Le poste doit contenir maximum 100 caractères")
+    private String jobTitle;
 
     @Email(message = "L'email doit être valide")
-    @NotBlank(message = "L'email est obligatoire")
+    @Size(max = 50, message = "L'email doit contenir maximum 50 caractères")
     private String email;
 
     @Pattern(regexp = "^$|^0[0-9]{9}$", message = "Le téléphone doit être vide ou contenir 10 chiffres commençant par 0")
     private String phone;
 
-    @NotNull(message = "Les informations des années scolaires sont obligatoires")
-    private List<SchoolYearDTO> schoolYears;
+    @Size(max = 500, message = "Le commentaire doit contenir maximum 500 caractères")
+    private String comment;
+
+    @NotNull(message = "L'ID de l'entreprise est obligatoire")
+    private Long companyId;
+    
+    private String companyName;
 }
+

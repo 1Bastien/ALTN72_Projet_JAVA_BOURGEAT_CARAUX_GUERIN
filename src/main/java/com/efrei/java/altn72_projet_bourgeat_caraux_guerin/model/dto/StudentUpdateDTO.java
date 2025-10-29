@@ -2,22 +2,17 @@ package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
- * DTO pour l'étudiant
+ * DTO pour la mise à jour des informations de base d'un étudiant
  */
 @Getter
-@Setter     
-public class StudentDTO {
-
-    private Long id;
+@Setter
+public class StudentUpdateDTO {
 
     @Size(max = 50, message = "Le prénom doit contenir maximum 50 caractères")
     private String firstName;
@@ -32,7 +27,5 @@ public class StudentDTO {
 
     @Pattern(regexp = "^$|^0[0-9]{9}$", message = "Le téléphone doit être vide ou contenir 10 chiffres commençant par 0")
     private String phone;
-
-    @NotNull(message = "Les informations des années scolaires sont obligatoires")
-    private List<SchoolYearDTO> schoolYears;
 }
+
