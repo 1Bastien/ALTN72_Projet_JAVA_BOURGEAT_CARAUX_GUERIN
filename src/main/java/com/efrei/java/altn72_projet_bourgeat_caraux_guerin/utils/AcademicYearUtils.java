@@ -11,12 +11,20 @@ public class AcademicYearUtils {
     private AcademicYearUtils() {}
 
     /**
-     * Obtient l'année académique actuelle (ex: "2025/2026" si on est en 2025)
+     * Obtient l'année académique actuelle
+     * L'année académique commence en septembre
      * @return L'année académique actuelle
      */
     public static String getCurrentAcademicYear() {
-        int currentYear = LocalDate.now().getYear();
-        return String.format("%d/%d", currentYear, currentYear + 1);
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+        
+        if (currentMonth >= 9) {
+            return String.format("%d/%d", currentYear, currentYear + 1);
+        } else {
+            return String.format("%d/%d", currentYear - 1, currentYear);
+        }
     }
 
     /**
@@ -43,5 +51,34 @@ public class AcademicYearUtils {
                 return Math.abs(year1 - currentYear) - Math.abs(year2 - currentYear);
             })
             .orElse(availableYears.get(0));
+    }
+
+    /**
+     * Calcule l'année académique suivante
+     * @param academicYear L'année académique actuelle
+     * @return L'année académique suivante
+     */
+    public static String getNextAcademicYear(String academicYear) {
+        String[] years = academicYear.split("/");
+        int startYear = Integer.parseInt(years[0]);
+        return (startYear + 1) + "/" + (startYear + 2);
+    }
+
+    /**
+     * Convertit une année académique au format URL
+     * @param academicYear L'année académique
+     * @return L'année académique pour URL
+     */
+    public static String toUrlFormat(String academicYear) {
+        return academicYear.replace("/", "-");
+    }
+
+    /**
+     * Convertit une année académique depuis le format URL
+     * @param academicYear L'année académique
+     * @return L'année académique standard
+     */ 
+    public static String fromUrlFormat(String academicYear) {
+        return academicYear.replace("-", "/");
     }
 }

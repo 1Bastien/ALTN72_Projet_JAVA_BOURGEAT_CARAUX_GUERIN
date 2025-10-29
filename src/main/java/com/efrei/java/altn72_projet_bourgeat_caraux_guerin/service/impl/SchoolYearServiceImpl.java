@@ -4,6 +4,7 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.reposi
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.SchoolYearService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,10 +28,10 @@ public class SchoolYearServiceImpl implements SchoolYearService {
             List<String> years = schoolYearRepository.findDistinctAcademicYearByOrderByAcademicYearDesc();
             logger.info("Années académiques récupérées : {}", years);
             return years;
-        } catch (Exception ex) {
-            logger.error("Erreur lors de la récupération des années académiques", ex);
+        } catch (DataAccessException ex) {
+            logger.error("Erreur d'accès aux données lors de la récupération des années académiques", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur est survenue lors de la récupération des années académiques");
+                "Une erreur de base de données est survenue lors de la récupération des années académiques");
         }
     }
 }

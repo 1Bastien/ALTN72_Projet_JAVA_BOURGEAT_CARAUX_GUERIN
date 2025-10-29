@@ -1,5 +1,6 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.SchoolYearDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.StudentDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.enums.Program;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.StudentService;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.utils.AcademicYearUtils;
 
@@ -29,11 +31,19 @@ public class DashboardServiceImpl implements DashboardService {
         String currentYear = academicYear != null ? academicYear : 
             AcademicYearUtils.findClosestAcademicYear(academicYears);
 
-        model.addAttribute("newStudent", new StudentDTO());
+        StudentDTO newStudent = new StudentDTO();
+        SchoolYearDTO schoolYearDTO = new SchoolYearDTO();
+        schoolYearDTO.setAcademicYear(currentYear);
+        List<SchoolYearDTO> schoolYears = new ArrayList<>();
+        schoolYears.add(schoolYearDTO);
+        newStudent.setSchoolYears(schoolYears);
+
+        model.addAttribute("newStudent", newStudent);
         model.addAttribute("programs", Program.values());
         model.addAttribute("showModal", showModal);
         model.addAttribute("academicYears", academicYears);
         model.addAttribute("currentYear", currentYear);
+        model.addAttribute("isDashboard", true);
         model.addAttribute("students", academicYears.isEmpty() ? 
             List.of() : 
             studentService.getStudentsForCurrentYear(currentYear));
@@ -52,6 +62,7 @@ public class DashboardServiceImpl implements DashboardService {
         model.addAttribute("programs", Program.values());
         model.addAttribute("academicYears", academicYears);
         model.addAttribute("currentYear", currentYear);
+        model.addAttribute("isDashboard", true);
         model.addAttribute("showModal", true);
 
         if (result != null) {
