@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!-- Fragment de la modal de recherche -->
+    <div
+      th:fragment="search-modal"
+      class="modal fade"
+      id="searchModal"
+      tabindex="-1"
+      aria-labelledby="searchModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="searchModalLabel">
+              <i class="fas fa-search me-2"></i>Rechercher un apprenti
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="searchForm" class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="searchName" class="form-label"
+                  >Nom de l'apprenti</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchName"
+                  name="name"
+                  placeholder="Rechercher par nom"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="searchCompany" class="form-label">Entreprise</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchCompany"
+                  name="company"
+                  placeholder="Rechercher par entreprise"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="searchMissionKeyword" class="form-label"
+                  >Mot-clé mission</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchMissionKeyword"
+                  name="missionKeyword"
+                  placeholder="Mot-clé de la mission"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="searchAcademicYear" class="form-label"
+                  >Année académique</label
+                >
+                <select
+                  class="form-select"
+                  id="searchAcademicYear"
+                  name="academicYear"
+                >
+                  <option value="">Toutes les années</option>
+                  <option
+                    th:each="year : ${academicYears}"
+                    th:value="${year}"
+                    th:text="${year}"
+                  ></option>
+                </select>
+              </div>
+              <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="reset" class="btn btn-outline-secondary">
+                  <i class="fas fa-undo me-2"></i>Réinitialiser
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-search me-2"></i>Rechercher
+                </button>
+              </div>
+            </form>
+
+            <!-- Résultats de la recherche -->
+            <div id="searchResults" class="d-none">
+              <hr />
+              <h6 class="text-muted mb-3">
+                <span id="resultsCount"></span>
+              </h6>
+              <div class="list-group" id="resultsList"></div>
+            </div>
+
+            <!-- Message de chargement -->
+            <div id="searchLoading" class="text-center py-4 d-none">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
