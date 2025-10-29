@@ -16,7 +16,39 @@
     <div th:replace="~{fragments/header :: main-header}"></div>
 
     <div class="container">
-      <h1 class="text-primary mb-4">Mon tableau de bord</h1>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary mb-0">Mon tableau de bord</h1>
+        <div class="dropdown">
+          <button 
+            class="btn btn-outline-primary dropdown-toggle" 
+            type="button" 
+            id="managementDropdown" 
+            data-bs-toggle="dropdown" 
+            aria-expanded="false"
+            data-bs-auto-close="true">
+            <i class="fas fa-cog me-2"></i>Gestion
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="managementDropdown">
+            <li>
+              <a class="dropdown-item" th:href="@{/management/companies}">
+                <i class="fas fa-building me-2 text-primary"></i>Entreprises
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item" th:href="@{/management/mentors}">
+                <i class="fas fa-user-tie me-2 text-primary"></i>Maîtres d'apprentissage
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item" th:href="@{/archives}">
+                <i class="fas fa-archive me-2 text-primary"></i>Archives
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="fas fa-exclamation-circle me-2"></i>
@@ -62,26 +94,44 @@
                     <p class="mb-0">Aucun étudiant n'est inscrit pour cette année académique</p>
                   </td>
                 </tr>
-                <tr th:each="student : ${students}" th:unless="${students.empty}">
+                <tr 
+                    th:each="student : ${students}" 
+                    th:unless="${students.empty}"
+                    class="clickable-row"
+                    th:data-href="@{/student/{id}/{year}(id=${student.id}, year=${currentYear.replace('/', '-')})}"
+                    style="cursor: pointer"
+                >
                   <td class="py-3" th:text="${student.lastName}"></td>
                   <td class="py-3" th:text="${student.firstName}"></td>
                   <td class="py-3">
                     <div class="d-flex justify-content-around align-items-center">
                       <span th:text="${student.email ?: '-'}" class="me-2"></span>
-                      <a th:if="${student.email}" th:href="'mailto:' + ${student.email}" class="btn btn-sm btn-outline-primary" title="Envoyer un email">
+                      <a 
+                        th:if="${student.email}" 
+                        th:href="'mailto:' + ${student.email}" 
+                        class="btn btn-sm btn-outline-primary" 
+                        title="Envoyer un email"
+                        onclick="event.stopPropagation();"
+                      >
                         <i class="fas fa-envelope"></i>
                       </a>
                     </div>
                   </td>
                   <td class="py-3">
                     <div class="d-flex justify-content-around align-items-center">
-                      <span th:text="${student.phone != null ? '0' + student.phone : '-'}" class="me-2"></span>
-                      <a th:if="${student.phone}" th:href="'tel:0' + ${student.phone}" class="btn btn-sm btn-outline-primary" title="Appeler">
+                      <span th:text="${student.phone ?: '-'}" class="me-2"></span>
+                      <a 
+                        th:if="${student.phone}" 
+                        th:href="'tel:' + ${student.phone}" 
+                        class="btn btn-sm btn-outline-primary" 
+                        title="Appeler"
+                        onclick="event.stopPropagation();"
+                      >
                         <i class="fas fa-phone"></i>
                       </a>
                     </div>
                   </td>
-                  <td class="py-3" th:text="${!student.schoolYears.empty ? student.schoolYears[0].program : '-'}"></td>
+                  <td class="py-3" th:text="${student.schoolYears != null and !student.schoolYears.isEmpty() ? student.schoolYears[0].program : '-'}"></td>
                 </tr>
               </tbody>
             </table>
@@ -216,11 +266,21 @@
       </div>
     </div>
 
-    <script th:src="@{/js/student-form.js}"></script>
+    <div th:replace="~{fragments/search-modal :: search-modal}"></div>
 
     <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/fonts/fontawesome/js/all.min.js}" defer></script>
     <script th:src="@{/js/header.js}"></script>
-    <script th:src="@{/js/dashboard.js}"></script>
+    <script th:src="@{/js/search.js}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const rows = document.querySelectorAll(".clickable-row");
+        rows.forEach((row) => {
+          row.addEventListener("click", function () {
+            window.location.href = this.dataset.href;
+          });
+        });
+      });
+    </script>
   </body>
 </html>
