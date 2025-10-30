@@ -1,0 +1,32 @@
+# Fichier de configuration Infrastructure as Code pour Render.com
+# Ce fichier permet de déployer automatiquement votre application et sa base de données
+
+databases:
+  - name: projet-java-db
+    databaseName: projet_java
+    user: projet_java_user
+    plan: free
+    region: frankfurt  # Changez selon votre région préférée: oregon, frankfurt, singapore, ohio
+
+services:
+  - type: web
+    name: projet-java-app
+    runtime: docker
+    region: frankfurt  # Même région que la base de données
+    plan: free
+    branch: main
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: projet-java-db
+          property: connectionString
+      - key: PORT
+        value: 8080
+      - key: DDL_AUTO
+        value: update
+      - key: SHOW_SQL
+        value: false
+      - key: JAVA_OPTS
+        value: "-Xmx512m -Xms256m"
+

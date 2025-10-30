@@ -1,0 +1,34 @@
+# Ignorer le dossier target (sera recréé pendant le build)
+target/
+
+# Ignorer les fichiers Git
+.git/
+.gitignore
+.gitattributes
+
+# Ignorer les fichiers IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ignorer les fichiers de documentation
+README.md
+rapport.md
+*.md
+
+# Ignorer les fichiers de test
+src/test/
+
+# Ignorer les fichiers système
+.DS_Store
+Thumbs.db
+
+# Ignorer les logs
+*.log
+
+# Fichiers Maven locaux
+.mvn/wrapper/maven-wrapper.jar
+
