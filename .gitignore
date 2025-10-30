@@ -76,3 +76,6 @@ build/
 *.bak
 *.swp
 *~
+
+.vscode/
+.cursor/

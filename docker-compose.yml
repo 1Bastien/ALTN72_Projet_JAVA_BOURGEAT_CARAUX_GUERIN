@@ -1,42 +1,46 @@
-# Docker Compose pour tester localement avant le déploiement sur Render
-version: "3.8"
-
 services:
-  # Base de données PostgreSQL
   postgres:
     image: postgres:16-alpine
-    container_name: altn72-db-local
+    container_name: projet-postgres
     environment:
       POSTGRES_DB: projet_java
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: apppass
+      POSTGRES_USER: projet_user
+      POSTGRES_PASSWORD: projet_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d projet_java"]
+      test: ["CMD-SHELL", "pg_isready -U projet_user -d projet_java"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+    networks:
+      - app-network
 
-  # Application Spring Boot
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: altn72-app-local
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DATABASE_URL: jdbc:postgresql://postgres:5432/projet_java?user=appuser&password=apppass
-      JAVA_OPTS: -Xmx512m -Xms256m
+    container_name: projet-app
     ports:
       - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/projet_java
+      SPRING_DATASOURCE_USERNAME: projet_user
+      SPRING_DATASOURCE_PASSWORD: projet_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - app-network
     restart: unless-stopped
 
 volumes:
   postgres_data:
-    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+

@@ -1,35 +1,32 @@
 # Stage 1: Build
-FROM maven:3.9-eclipse-temurin-17-alpine AS build
-
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copier le pom.xml et télécharger les dépendances
+# Copier seulement pom.xml pour télécharger les dépendances (cache layer)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
 
-# Copier le code source et compiler
+# Télécharger les dépendances (ce layer sera en cache si pom.xml ne change pas)
+RUN mvn dependency:go-offline -B || true
+
+# Copier le code source
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+
+# Compiler l'application
+RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime
-FROM eclipse-temurin:17-jre-alpine
-
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Créer un utilisateur non-root pour la sécurité
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
-
-# Copier le JAR depuis l'étape de build
-COPY --from=build /app/target/ALTN72_Projet_BOURGEAT_CARAUX_GUERIN-0.0.1-SNAPSHOT.jar app.jar
+# Copier le JAR depuis le stage de build
+COPY --from=build /app/target/*.jar app.jar
 
 # Exposer le port
 EXPOSE 8080
 
-# Variables d'environnement par défaut
-ENV JAVA_OPTS="-Xmx512m -Xms256m"
-ENV SPRING_PROFILES_ACTIVE=prod
+# Variable d'environnement pour le profil Spring
+ENV SPRING_PROFILES_ACTIVE=docker
 
 # Lancer l'application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
 

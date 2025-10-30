@@ -1,33 +1,12 @@
-# Ignorer les fichiers inutiles pour Docker
 target/
-!target/ALTN72_Projet_BOURGEAT_CARAUX_GUERIN-0.0.1-SNAPSHOT.jar
-.mvn/
-mvnw
-mvnw.cmd
-
-# Fichiers IDE
 .idea/
 .vscode/
 *.iml
-*.swp
-*.swo
-*.swn
-
-# Git
+.DS_Store
 .git/
 .gitignore
-.gitattributes
-
-# Documentation
 *.md
-HELP.md
-
-# Fichiers système
-.DS_Store
-Thumbs.db
-
-# Fichiers de test et rapports
-*.log
-*.tmp
-.jacoco/
+docker-compose.yml
+Dockerfile
+.dockerignore
 

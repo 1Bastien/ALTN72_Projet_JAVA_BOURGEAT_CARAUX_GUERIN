@@ -14,6 +14,7 @@ import java.util.Collections;
  * Implémente UserDetails pour être utilisé directement par Spring Security
  */
 @Entity
+@Table(name = "app_user")
 @Setter
 @Getter
 public class User implements UserDetails {
