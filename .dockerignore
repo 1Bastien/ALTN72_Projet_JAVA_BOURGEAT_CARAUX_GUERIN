@@ -1,12 +1,39 @@
+# Maven
 target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
 .idea/
-.vscode/
+*.iws
 *.iml
-.DS_Store
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# Git
 .git/
 .gitignore
+.gitattributes
+
+# Documentation
 *.md
-docker-compose.yml
+rapport.md
+
+# Docker
 Dockerfile
+docker-compose.yml
 .dockerignore
 
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Tests
+**/test/

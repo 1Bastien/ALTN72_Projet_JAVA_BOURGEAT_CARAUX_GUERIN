@@ -43,7 +43,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login-page", "/css/**", "/js/**", "/fonts/**", "/media/**", "/webfonts/**", "/webjars/**").permitAll()
+                        .requestMatchers("/login-page", "/css/**", "/js/**", "/fonts/**", "/media/**", "/webfonts/**", "/webjars/**", "/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
