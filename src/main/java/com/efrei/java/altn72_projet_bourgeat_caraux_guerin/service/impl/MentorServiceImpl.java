@@ -1,5 +1,6 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.MentorServiceException;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.MentorDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.Company;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.Mentor;
@@ -38,6 +39,8 @@ public class MentorServiceImpl implements MentorService {
         this.mentorMapper = mentorMapper;
     }
 
+
+    // Implementation d'une exception personnalisée pour les erreurs du service Mentor
     @Override
     public List<MentorDTO> getAllMentors() {
         try {
@@ -45,8 +48,8 @@ public class MentorServiceImpl implements MentorService {
             return mentors.isEmpty() ? List.of() : mentorMapper.toDTOList(mentors);
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des mentors", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la récupération des mentors");
+            throw new MentorServiceException(
+                "Une erreur de base de données est survenue lors de la récupération des mentors", ex);
         }
     }
 
