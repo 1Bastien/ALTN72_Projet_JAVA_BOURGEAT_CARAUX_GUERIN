@@ -8,7 +8,6 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.CompanyServic
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,11 +63,6 @@ public class CompanyServiceImpl implements CompanyService {
             logger.info("Entreprise {} créée avec succès", savedCompany.getCompanyName());
             return companyMapper.toDTO(savedCompany);
             
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte d'intégrité lors de la création de l'entreprise {}", 
-                companyDTO.getCompanyName(), ex);
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Une entreprise avec ce nom existe déjà");
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la création de l'entreprise {}", 
                 companyDTO.getCompanyName(), ex);
@@ -97,10 +91,6 @@ public class CompanyServiceImpl implements CompanyService {
             logger.info("Entreprise {} mise à jour avec succès", id);
             return companyMapper.toDTO(updatedCompany);
             
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte d'intégrité lors de la mise à jour de l'entreprise {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Une entreprise avec ce nom existe déjà");
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la mise à jour de l'entreprise {}", id, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -121,11 +111,6 @@ public class CompanyServiceImpl implements CompanyService {
         try {
             companyRepository.delete(company);
             logger.info("Entreprise {} supprimée avec succès", id);
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Impossible de supprimer l'entreprise {} car elle est référencée", id, ex);
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Impossible de supprimer l'entreprise car elle est associée à des mentors ou des années scolaires");
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la suppression de l'entreprise {}", id, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

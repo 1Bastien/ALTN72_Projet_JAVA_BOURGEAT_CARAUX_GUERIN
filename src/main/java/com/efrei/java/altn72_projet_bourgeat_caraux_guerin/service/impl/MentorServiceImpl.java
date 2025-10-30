@@ -11,7 +11,6 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.MentorService
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,10 +94,6 @@ public class MentorServiceImpl implements MentorService {
             logger.info("Mentor {} {} créé avec succès", savedMentor.getFirstName(), savedMentor.getLastName());
             return mentorMapper.toDTO(savedMentor);
             
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte d'unicité pour l'email : {}", mentorDTO.getEmail(), ex);
-            throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                String.format("L'adresse email '%s' est déjà utilisée", mentorDTO.getEmail()));
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la création du mentor {} {}", 
                 mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
@@ -134,10 +129,6 @@ public class MentorServiceImpl implements MentorService {
             logger.info("Mentor {} mis à jour avec succès", id);
             return mentorMapper.toDTO(updatedMentor);
             
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte d'unicité pour l'email : {}", mentorDTO.getEmail(), ex);
-            throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                String.format("L'adresse email '%s' est déjà utilisée", mentorDTO.getEmail()));
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la mise à jour du mentor {}", id, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -159,10 +150,6 @@ public class MentorServiceImpl implements MentorService {
             mentorRepository.delete(mentor);
             logger.info("Mentor {} supprimé avec succès", id);
             
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Impossible de supprimer le mentor {} car il est référencé", id, ex);
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Impossible de supprimer le mentor car il est associé à des étudiants");
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la suppression du mentor {}", id, ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

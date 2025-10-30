@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -116,6 +117,10 @@ public class ManagementController {
                 "L'entreprise a été créée avec succès");
             logger.info("Entreprise {} créée avec succès", companyDTO.getCompanyName());
             
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Violation de contrainte lors de la création de l'entreprise {}", companyDTO.getCompanyName(), ex);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Une entreprise avec ce nom existe déjà ou une contrainte d'unicité a été violée");
         } catch (ResponseStatusException ex) {
             logger.error("Erreur lors de la création de l'entreprise {}", companyDTO.getCompanyName(), ex);
             redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
@@ -160,6 +165,10 @@ public class ManagementController {
                 "L'entreprise a été mise à jour avec succès");
             logger.info("Entreprise {} mise à jour avec succès", id);
             
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Violation de contrainte lors de la mise à jour de l'entreprise {}", id, ex);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Une entreprise avec ce nom existe déjà ou une contrainte d'unicité a été violée");
         } catch (ResponseStatusException ex) {
             logger.error("Erreur lors de la mise à jour de l'entreprise {}", id, ex);
             redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
@@ -192,6 +201,10 @@ public class ManagementController {
                 "L'entreprise et toutes ses dépendances ont été supprimées avec succès");
             logger.info("Entreprise {} supprimée avec succès", id);
             
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Impossible de supprimer l'entreprise {} car elle est référencée", id, ex);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Impossible de supprimer l'entreprise car elle est associée à des mentors ou des années scolaires");
         } catch (ResponseStatusException ex) {
             logger.error("Erreur lors de la suppression de l'entreprise {}", id, ex);
             redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
@@ -233,6 +246,11 @@ public class ManagementController {
             logger.info("Maître d'apprentissage {} {} créé avec succès", 
                 mentorDTO.getFirstName(), mentorDTO.getLastName());
             
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Violation de contrainte lors de la création du mentor {} {}", 
+                mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "L'adresse email est déjà utilisée ou une contrainte d'unicité a été violée");
         } catch (ResponseStatusException ex) {
             logger.error("Erreur lors de la création du maître d'apprentissage {} {}", 
                 mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
@@ -278,6 +296,10 @@ public class ManagementController {
                 "Le maître d'apprentissage a été mis à jour avec succès");
             logger.info("Maître d'apprentissage {} mis à jour avec succès", id);
             
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Violation de contrainte lors de la mise à jour du mentor {}", id, ex);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "L'adresse email est déjà utilisée ou une contrainte d'unicité a été violée");
         } catch (ResponseStatusException ex) {
             logger.error("Erreur lors de la mise à jour du maître d'apprentissage {}", id, ex);
             redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
@@ -310,6 +332,10 @@ public class ManagementController {
                 "Le maître d'apprentissage a été supprimé avec succès");
             logger.info("Maître d'apprentissage {} supprimé avec succès", id);
             
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Impossible de supprimer le mentor {} car il est référencé", id, ex);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Impossible de supprimer le maître d'apprentissage car il est associé à des années scolaires ou des étudiants");
         } catch (ResponseStatusException ex) {
             logger.error("Erreur lors de la suppression du maître d'apprentissage {}", id, ex);
             redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
