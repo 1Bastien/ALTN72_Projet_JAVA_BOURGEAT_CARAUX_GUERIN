@@ -1,8 +1,0 @@
-# Dockerfile simple pour MariaDB
-FROM mariadb:11.2
-
-# Copier les scripts d'initialisation si nécessaire
-# COPY ./init-scripts/ /docker-entrypoint-initdb.d/
-
-# Variables d'environnement définies via render.yaml
-

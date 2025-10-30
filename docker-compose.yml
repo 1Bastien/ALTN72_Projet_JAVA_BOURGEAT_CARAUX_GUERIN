@@ -1,22 +1,21 @@
 # Docker Compose pour tester localement avant le déploiement sur Render
-version: '3.8'
+version: "3.8"
 
 services:
-  # Base de données MariaDB
-  mariadb:
-    image: mariadb:11.2
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
     container_name: altn72-db-local
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: projet_java
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppass
+      POSTGRES_DB: projet_java
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -U appuser -d projet_java"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -29,20 +28,15 @@ services:
     container_name: altn72-app-local
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: mariadb
-      DB_PORT: 3306
-      DB_NAME: projet_java
-      DB_USERNAME: appuser
-      DB_PASSWORD: apppass
+      DATABASE_URL: jdbc:postgresql://postgres:5432/projet_java?user=appuser&password=apppass
       JAVA_OPTS: -Xmx512m -Xms256m
     ports:
       - "8080:8080"
     depends_on:
-      mariadb:
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  mariadb_data:
+  postgres_data:
     driver: local
-
