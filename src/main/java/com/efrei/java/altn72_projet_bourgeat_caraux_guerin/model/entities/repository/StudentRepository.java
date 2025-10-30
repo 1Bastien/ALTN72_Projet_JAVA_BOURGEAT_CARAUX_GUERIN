@@ -42,18 +42,17 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
      * @param academicYear Année académique
      * @return La liste des étudiants correspondant aux critères
      */
-    @Query("""
-        SELECT DISTINCT s
-        FROM Student s
-        LEFT JOIN s.schoolYears sy
-        LEFT JOIN sy.company c
-        LEFT JOIN sy.mission m
-        WHERE (s.isArchived IS NULL OR s.isArchived = false)
-          AND (:name IS NULL OR LOWER(s.lastName) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:company IS NULL OR (c IS NOT NULL AND LOWER(c.companyName) LIKE LOWER(CONCAT('%', :company, '%'))))
-          AND (:missionKeyword IS NULL OR (m IS NOT NULL AND LOWER(m.keywords) LIKE LOWER(CONCAT('%', :missionKeyword, '%'))))
-          AND (:academicYear IS NULL OR (sy IS NOT NULL AND sy.academicYear = :academicYear))
-    """)
+    @Query(value = """
+        SELECT DISTINCT s.*
+        FROM student s
+        LEFT JOIN school_year sy ON s.id = sy.student_id
+        LEFT JOIN company c ON c.id = sy.company_id
+        WHERE (s.is_archived IS NULL OR s.is_archived = false)
+          AND (:name IS NULL OR LOWER(s.last_name) LIKE LOWER(CONCAT('%', :name, '%')))
+          AND (:company IS NULL OR (c.id IS NOT NULL AND LOWER(c.company_name) LIKE LOWER(CONCAT('%', :company, '%'))))
+          AND (:missionKeyword IS NULL OR LOWER(COALESCE(sy.keywords, '')) LIKE LOWER(CONCAT('%', :missionKeyword, '%')))
+          AND (:academicYear IS NULL OR (sy.id IS NOT NULL AND sy.academic_year = :academicYear))
+    """, nativeQuery = true)
     List<Student> searchStudents(
             @Param("name") String name,
             @Param("company") String company,

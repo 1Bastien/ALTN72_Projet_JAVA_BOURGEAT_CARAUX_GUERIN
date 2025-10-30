@@ -18,7 +18,7 @@ public interface SchoolYearRepository extends JpaRepository<SchoolYear, Long> {
      * Récupère la liste des années scolaires existantes
      * @return La liste des années scolaires distinctes
      */
-    @Query(value = "SELECT DISTINCT academic_year FROM school_year ORDER BY academic_year DESC", nativeQuery = true)
+    @Query("SELECT DISTINCT sy.academicYear FROM SchoolYear sy ORDER BY sy.academicYear DESC")
     List<String> findDistinctAcademicYearByOrderByAcademicYearDesc();
 
     /**

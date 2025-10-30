@@ -21,7 +21,7 @@ public class SearchCriteriaDTO {
     @Size(max = 100, message = "Les mots-clés doivent contenir maximum 100 caractères")
     private String missionKeyword;
     
-    @Pattern(regexp = "^\\d{4}/\\d{4}$", message = "L'année académique doit être au format XXXX/XXXX")
+    @Pattern(regexp = "^(\\d{4}/\\d{4})?$", message = "L'année académique doit être au format XXXX/XXXX")
     private String academicYear;
 }
 
