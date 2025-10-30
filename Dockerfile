@@ -24,8 +24,8 @@ COPY --from=build /app/target/*.jar app.jar
 # Exposer le port
 EXPOSE 8080
 
-# Variable d'environnement pour le profil Spring
-ENV SPRING_PROFILES_ACTIVE=docker
+# Variable d'environnement pour le profil Spring (peut être écrasée)
+ENV SPRING_PROFILES_ACTIVE=prod
 
 # Lancer l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]
