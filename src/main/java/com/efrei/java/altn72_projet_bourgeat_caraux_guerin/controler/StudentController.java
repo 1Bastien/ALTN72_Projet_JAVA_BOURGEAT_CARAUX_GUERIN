@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -57,16 +56,9 @@ public class StudentController {
     })
     @GetMapping
     public String getDashboard(Model model) {
-        try {
-            dashboardService.prepareDashboardModel(model, null, false);
-            logger.info("Dashboard affiché");
-            return "dashboard";
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors de l'affichage du dashboard", e);
-            model.addAttribute("errorMessage", e.getReason());
-            dashboardService.prepareDashboardModel(model, null, false);
-            return "dashboard";
-        }
+        dashboardService.prepareDashboardModel(model, null, false);
+        logger.info("Dashboard affiché");
+        return "dashboard";
     }
 
     /**
@@ -84,17 +76,10 @@ public class StudentController {
             @Parameter(description = "Année académique au format YYYY-YYYY (ex: 2024-2025)", required = true)
             @PathVariable("academicYear") String academicYear, 
             Model model) {
-        try {
-            String formattedAcademicYear = AcademicYearUtils.fromUrlFormat(academicYear);
-            dashboardService.prepareDashboardModel(model, formattedAcademicYear, false);
-            logger.info("Dashboard affiché pour l'année académique : {}", formattedAcademicYear);
-            return "dashboard";
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors de l'affichage du dashboard pour l'année {}", academicYear, e);
-            model.addAttribute("errorMessage", e.getReason());
-            dashboardService.prepareDashboardModel(model, null, false);
-            return "dashboard";
-        }
+        String formattedAcademicYear = AcademicYearUtils.fromUrlFormat(academicYear);
+        dashboardService.prepareDashboardModel(model, formattedAcademicYear, false);
+        logger.info("Dashboard affiché pour l'année académique : {}", formattedAcademicYear);
+        return "dashboard";
     }
 
     /**
@@ -123,18 +108,12 @@ public class StudentController {
             return "dashboard";
         }
 
-        try {
-            studentService.saveStudent(studentDTO);
-            logger.info("Étudiant créé avec succès : {} {}", studentDTO.getFirstName(), studentDTO.getLastName());
-            redirectAttributes.addFlashAttribute("successMessage",
-                String.format("L'étudiant %s %s a été créé avec succès",
-                    studentDTO.getFirstName(), studentDTO.getLastName()));
-            return "redirect:/";
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors de la création de l'étudiant {} {}", studentDTO.getFirstName(), studentDTO.getLastName(), e);
-            dashboardService.prepareErrorModel(model, studentDTO, null, e.getMessage());
-            return "dashboard";
-        }
+        studentService.saveStudent(studentDTO);
+        logger.info("Étudiant créé avec succès : {} {}", studentDTO.getFirstName(), studentDTO.getLastName());
+        redirectAttributes.addFlashAttribute("successMessage",
+            String.format("L'étudiant %s %s a été créé avec succès",
+                studentDTO.getFirstName(), studentDTO.getLastName()));
+        return "redirect:/";
     }
 
     /**
@@ -153,22 +132,16 @@ public class StudentController {
             @Parameter(description = "Année académique actuelle", required = true)
             @RequestParam("academicYear") String academicYear, 
             RedirectAttributes redirectAttributes) {
-        try {
-            String formattedAcademicYear = AcademicYearUtils.fromUrlFormat(academicYear);
-            String resultMessage = studentService.progressToNextAcademicYear(formattedAcademicYear);
-            
-            logger.info("Passage à l'année suivante effectué : {}", resultMessage);
-            redirectAttributes.addFlashAttribute("successMessage", resultMessage);
-            
-            String nextAcademicYear = AcademicYearUtils.getNextAcademicYear(formattedAcademicYear);
-            String nextAcademicYearUrl = AcademicYearUtils.toUrlFormat(nextAcademicYear);
-            
-            return "redirect:/" + nextAcademicYearUrl;
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors du passage à l'année suivante", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getReason());
-            return "redirect:/";
-        }
+        String formattedAcademicYear = AcademicYearUtils.fromUrlFormat(academicYear);
+        String resultMessage = studentService.progressToNextAcademicYear(formattedAcademicYear);
+        
+        logger.info("Passage à l'année suivante effectué : {}", resultMessage);
+        redirectAttributes.addFlashAttribute("successMessage", resultMessage);
+        
+        String nextAcademicYear = AcademicYearUtils.getNextAcademicYear(formattedAcademicYear);
+        String nextAcademicYearUrl = AcademicYearUtils.toUrlFormat(nextAcademicYear);
+        
+        return "redirect:/" + nextAcademicYearUrl;
     }
 
     /**

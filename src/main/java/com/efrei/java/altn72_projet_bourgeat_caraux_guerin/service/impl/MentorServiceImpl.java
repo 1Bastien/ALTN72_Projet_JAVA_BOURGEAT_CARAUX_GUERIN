@@ -1,6 +1,7 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
-import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.MentorServiceException;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.DatabaseException;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.ResourceNotFoundException;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.MentorDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.Company;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.Mentor;
@@ -11,10 +12,8 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.MentorService
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -39,7 +38,6 @@ public class MentorServiceImpl implements MentorService {
     }
 
 
-    // Implementation d'une exception personnalisée pour les erreurs du service Mentor
     @Override
     public List<MentorDTO> getAllMentors() {
         try {
@@ -47,7 +45,7 @@ public class MentorServiceImpl implements MentorService {
             return mentors.isEmpty() ? List.of() : mentorMapper.toDTOList(mentors);
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des mentors", ex);
-            throw new MentorServiceException(
+            throw new DatabaseException(
                 "Une erreur de base de données est survenue lors de la récupération des mentors", ex);
         }
     }
@@ -60,8 +58,8 @@ public class MentorServiceImpl implements MentorService {
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des mentors pour l'entreprise {}", 
                 companyId, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la récupération des mentors");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la récupération des mentors", ex);
         }
     }
 
@@ -70,7 +68,7 @@ public class MentorServiceImpl implements MentorService {
         return mentorMapper.toDTO(mentorRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucun mentor trouvé avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("Le mentor avec l'identifiant %d est introuvable", id));
             }));
     }
@@ -81,7 +79,7 @@ public class MentorServiceImpl implements MentorService {
         Company company = companyRepository.findById(mentorDTO.getCompanyId())
             .orElseThrow(() -> {
                 logger.error("Aucune entreprise trouvée avec l'ID : {}", mentorDTO.getCompanyId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'entreprise avec l'identifiant %d est introuvable", mentorDTO.getCompanyId()));
             });
         
@@ -97,8 +95,8 @@ public class MentorServiceImpl implements MentorService {
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la création du mentor {} {}", 
                 mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la création du mentor");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la création du mentor", ex);
         }
     }
 
@@ -108,14 +106,14 @@ public class MentorServiceImpl implements MentorService {
         // Vérifier que le mentor existe
         if (!mentorRepository.existsById(id)) {
             logger.error("Aucun mentor trouvé avec l'ID : {}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+            throw new ResourceNotFoundException(
                 String.format("Le mentor avec l'identifiant %d est introuvable", id));
         }
         
         Company company = companyRepository.findById(mentorDTO.getCompanyId())
             .orElseThrow(() -> {
                 logger.error("Aucune entreprise trouvée avec l'ID : {}", mentorDTO.getCompanyId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'entreprise avec l'identifiant %d est introuvable", mentorDTO.getCompanyId()));
             });
         
@@ -131,8 +129,8 @@ public class MentorServiceImpl implements MentorService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la mise à jour du mentor {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la mise à jour du mentor");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la mise à jour du mentor", ex);
         }
     }
 
@@ -142,7 +140,7 @@ public class MentorServiceImpl implements MentorService {
         Mentor mentor = mentorRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucun mentor trouvé avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("Le mentor avec l'identifiant %d est introuvable", id));
             });
         
@@ -152,8 +150,8 @@ public class MentorServiceImpl implements MentorService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la suppression du mentor {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la suppression du mentor");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la suppression du mentor", ex);
         }
     }
 }

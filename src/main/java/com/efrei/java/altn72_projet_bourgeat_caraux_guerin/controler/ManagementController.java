@@ -12,12 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -50,15 +48,10 @@ public class ManagementController {
     })
     @GetMapping("/companies")
     public String getCompaniesManagement(Model model) {
-        try {
-            model.addAttribute("companies", companyService.getAllCompanies());
-            model.addAttribute("isDashboard", false);
-            logger.info("Page de gestion des entreprises affichée");
-            return "management-companies";
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de l'affichage de la gestion des entreprises", ex);
-            return "redirect:/";
-        }
+        model.addAttribute("companies", companyService.getAllCompanies());
+        model.addAttribute("isDashboard", false);
+        logger.info("Page de gestion des entreprises affichée");
+        return "management-companies";
     }
 
     /**
@@ -73,16 +66,11 @@ public class ManagementController {
     })
     @GetMapping("/mentors")
     public String getMentorsManagement(Model model) {
-        try {
-            model.addAttribute("mentors", mentorService.getAllMentors());
-            model.addAttribute("companies", companyService.getAllCompanies());
-            model.addAttribute("isDashboard", false);
-            logger.info("Page de gestion des maîtres d'apprentissage affichée");
-            return "management-mentors";
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de l'affichage de la gestion des maîtres d'apprentissage", ex);
-            return "redirect:/";
-        }
+        model.addAttribute("mentors", mentorService.getAllMentors());
+        model.addAttribute("companies", companyService.getAllCompanies());
+        model.addAttribute("isDashboard", false);
+        logger.info("Page de gestion des maîtres d'apprentissage affichée");
+        return "management-mentors";
     }
 
     /**
@@ -110,21 +98,11 @@ public class ManagementController {
             return "redirect:/management/companies";
         }
 
-        try {
-            companyService.createCompany(companyDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "L'entreprise a été créée avec succès");
-            logger.info("Entreprise {} créée avec succès", companyDTO.getCompanyName());
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte lors de la création de l'entreprise {}", companyDTO.getCompanyName(), ex);
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Une entreprise avec ce nom existe déjà ou une contrainte d'unicité a été violée");
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la création de l'entreprise {}", companyDTO.getCompanyName(), ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        companyService.createCompany(companyDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "L'entreprise a été créée avec succès");
+        logger.info("Entreprise {} créée avec succès", companyDTO.getCompanyName());
         
         return "redirect:/management/companies";
     }
@@ -158,21 +136,11 @@ public class ManagementController {
             return "redirect:/management/companies";
         }
 
-        try {
-            companyService.updateCompany(id, companyDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "L'entreprise a été mise à jour avec succès");
-            logger.info("Entreprise {} mise à jour avec succès", id);
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte lors de la mise à jour de l'entreprise {}", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Une entreprise avec ce nom existe déjà ou une contrainte d'unicité a été violée");
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la mise à jour de l'entreprise {}", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        companyService.updateCompany(id, companyDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "L'entreprise a été mise à jour avec succès");
+        logger.info("Entreprise {} mise à jour avec succès", id);
         
         return "redirect:/management/companies";
     }
@@ -194,21 +162,11 @@ public class ManagementController {
             @Parameter(description = "ID de l'entreprise à supprimer", required = true)
             @PathVariable Long id, 
             RedirectAttributes redirectAttributes) {
-        try {
-            companyService.deleteCompany(id);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "L'entreprise et toutes ses dépendances ont été supprimées avec succès");
-            logger.info("Entreprise {} supprimée avec succès", id);
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Impossible de supprimer l'entreprise {} car elle est référencée", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Impossible de supprimer l'entreprise car elle est associée à des mentors ou des années scolaires");
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la suppression de l'entreprise {}", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        companyService.deleteCompany(id);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "L'entreprise et toutes ses dépendances ont été supprimées avec succès");
+        logger.info("Entreprise {} supprimée avec succès", id);
         
         return "redirect:/management/companies";
     }
@@ -238,24 +196,12 @@ public class ManagementController {
             return "redirect:/management/mentors";
         }
 
-        try {
-            mentorService.createMentor(mentorDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Le maître d'apprentissage a été créé avec succès");
-            logger.info("Maître d'apprentissage {} {} créé avec succès", 
-                mentorDTO.getFirstName(), mentorDTO.getLastName());
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte lors de la création du mentor {} {}", 
-                mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "L'adresse email est déjà utilisée ou une contrainte d'unicité a été violée");
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la création du maître d'apprentissage {} {}", 
-                mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        mentorService.createMentor(mentorDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Le maître d'apprentissage a été créé avec succès");
+        logger.info("Maître d'apprentissage {} {} créé avec succès", 
+            mentorDTO.getFirstName(), mentorDTO.getLastName());
         
         return "redirect:/management/mentors";
     }
@@ -289,21 +235,11 @@ public class ManagementController {
             return "redirect:/management/mentors";
         }
 
-        try {
-            mentorService.updateMentor(id, mentorDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Le maître d'apprentissage a été mis à jour avec succès");
-            logger.info("Maître d'apprentissage {} mis à jour avec succès", id);
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Violation de contrainte lors de la mise à jour du mentor {}", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "L'adresse email est déjà utilisée ou une contrainte d'unicité a été violée");
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la mise à jour du maître d'apprentissage {}", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        mentorService.updateMentor(id, mentorDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Le maître d'apprentissage a été mis à jour avec succès");
+        logger.info("Maître d'apprentissage {} mis à jour avec succès", id);
         
         return "redirect:/management/mentors";
     }
@@ -325,21 +261,11 @@ public class ManagementController {
             @Parameter(description = "ID du mentor à supprimer", required = true)
             @PathVariable Long id, 
             RedirectAttributes redirectAttributes) {
-        try {
-            mentorService.deleteMentor(id);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Le maître d'apprentissage a été supprimé avec succès");
-            logger.info("Maître d'apprentissage {} supprimé avec succès", id);
-            
-        } catch (DataIntegrityViolationException ex) {
-            logger.error("Impossible de supprimer le mentor {} car il est référencé", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Impossible de supprimer le maître d'apprentissage car il est associé à des années scolaires ou des étudiants");
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la suppression du maître d'apprentissage {}", id, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        mentorService.deleteMentor(id);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Le maître d'apprentissage a été supprimé avec succès");
+        logger.info("Maître d'apprentissage {} supprimé avec succès", id);
         
         return "redirect:/management/mentors";
     }

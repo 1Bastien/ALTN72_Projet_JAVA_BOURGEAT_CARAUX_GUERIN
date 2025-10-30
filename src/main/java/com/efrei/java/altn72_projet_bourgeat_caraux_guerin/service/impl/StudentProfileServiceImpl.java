@@ -1,5 +1,7 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.DatabaseException;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.ResourceNotFoundException;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.SchoolYearUpdateDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.*;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.repository.CompanyRepository;
@@ -15,11 +17,9 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.utils.AcademicYearUti
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,7 +65,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     @Override
     public void prepareProfileModel(Model model, Long studentId, String academicYear) {
         Student student = studentRepository.findById(studentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+            .orElseThrow(() -> new ResourceNotFoundException(
                 String.format("L'étudiant avec l'identifiant %d est introuvable", studentId)));
 
         try {
@@ -107,8 +107,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la préparation du modèle de profil pour l'étudiant {}", 
                 studentId, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la préparation de la page de profil");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la préparation de la page de profil", ex);
         }
     }
 
@@ -191,8 +191,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la mise à jour de l'année scolaire {}", schoolYearId, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la mise à jour de l'année scolaire");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la mise à jour de l'année scolaire", ex);
         }
     }
 
@@ -201,7 +201,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         return schoolYearRepository.findByStudentIdAndAcademicYear(studentId, academicYear)
             .orElseThrow(() -> {
                 logger.error("Aucune année scolaire trouvée pour l'étudiant {} et l'année {}", studentId, academicYear);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                return new ResourceNotFoundException(
                     String.format("Aucune année scolaire trouvée pour l'étudiant %d et l'année %s", studentId, academicYear));
             });
     }
@@ -211,7 +211,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         return schoolYearRepository.findById(schoolYearId)
             .orElseThrow(() -> {
                 logger.error("Aucune année scolaire trouvée avec l'ID : {}", schoolYearId);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                return new ResourceNotFoundException(
                     String.format("L'année scolaire avec l'identifiant %d est introuvable", schoolYearId));
             });
     }
@@ -221,7 +221,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         return companyRepository.findById(companyId)
             .orElseThrow(() -> {
                 logger.error("Aucune entreprise trouvée avec l'ID : {}", companyId);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                return new ResourceNotFoundException(
                     String.format("L'entreprise avec l'identifiant %d est introuvable", companyId));
             });
     }
@@ -231,7 +231,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         return mentorRepository.findById(mentorId)
             .orElseThrow(() -> {
                 logger.error("Aucun mentor trouvé avec l'ID : {}", mentorId);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                return new ResourceNotFoundException(
                     String.format("Le mentor avec l'identifiant %d est introuvable", mentorId));
             });
     }

@@ -1,13 +1,12 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.DatabaseException;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.repository.SchoolYearRepository;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.SchoolYearService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -30,8 +29,8 @@ public class SchoolYearServiceImpl implements SchoolYearService {
             return years;
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des années académiques", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la récupération des années académiques");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la récupération des années académiques", ex);
         }
     }
 }

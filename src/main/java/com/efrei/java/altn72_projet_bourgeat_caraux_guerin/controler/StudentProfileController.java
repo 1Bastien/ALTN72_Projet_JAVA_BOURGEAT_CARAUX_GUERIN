@@ -23,7 +23,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -70,14 +69,9 @@ public class StudentProfileController {
             @Parameter(description = "ID de l'étudiant", required = true)
             @PathVariable Long studentId, 
             Model model) {
-        try {
-            studentProfileService.prepareProfileModel(model, studentId, null);
-            logger.info("Page de profil affichée pour l'étudiant : {}", studentId);
-            return "student-profile";
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de l'affichage du profil de l'étudiant {}", studentId, ex);
-            return "redirect:/";
-        }
+        studentProfileService.prepareProfileModel(model, studentId, null);
+        logger.info("Page de profil affichée pour l'étudiant : {}", studentId);
+        return "student-profile";
     }
 
     /**
@@ -109,17 +103,11 @@ public class StudentProfileController {
             return "redirect:/student/" + studentId;
         }
 
-        try {
-            studentService.updateStudentBasicInfo(studentId, dto);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Les informations de l'étudiant ont été mises à jour avec succès");
-            logger.info("Informations de base mises à jour pour l'étudiant {}", studentId);
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la mise à jour des informations de l'étudiant {}", studentId, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        studentService.updateStudentBasicInfo(studentId, dto);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Les informations de l'étudiant ont été mises à jour avec succès");
+        logger.info("Informations de base mises à jour pour l'étudiant {}", studentId);
         
         return "redirect:/student/" + studentId;
     }
@@ -143,16 +131,10 @@ public class StudentProfileController {
             @Parameter(description = "Année académique au format YYYY-YYYY", required = true)
             @PathVariable String academicYear, 
             Model model) {
-        try {
-            String formattedAcademicYear = AcademicYearUtils.fromUrlFormat(academicYear);
-            studentProfileService.prepareProfileModel(model, studentId, formattedAcademicYear);
-            logger.info("Page de profil affichée pour l'étudiant {} - année {}", studentId, formattedAcademicYear);
-            return "student-profile";
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de l'affichage du profil de l'étudiant {} pour l'année {}", 
-                studentId, academicYear, ex);
-            return "redirect:/student/" + studentId;
-        }
+        String formattedAcademicYear = AcademicYearUtils.fromUrlFormat(academicYear);
+        studentProfileService.prepareProfileModel(model, studentId, formattedAcademicYear);
+        logger.info("Page de profil affichée pour l'étudiant {} - année {}", studentId, formattedAcademicYear);
+        return "student-profile";
     }
 
     /**
@@ -187,17 +169,11 @@ public class StudentProfileController {
             return "redirect:/student/" + studentId;
         }
 
-        try {
-            studentProfileService.updateSchoolYear(schoolYearId, dto);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Les informations ont été mises à jour avec succès");
-            logger.info("Année scolaire {} mise à jour avec succès", schoolYearId);
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la mise à jour de l'année scolaire {}", schoolYearId, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        studentProfileService.updateSchoolYear(schoolYearId, dto);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Les informations ont été mises à jour avec succès");
+        logger.info("Année scolaire {} mise à jour avec succès", schoolYearId);
         
         return "redirect:/student/" + studentId;
     }
@@ -230,17 +206,11 @@ public class StudentProfileController {
             return "redirect:/student/" + studentId;
         }
 
-        try {
-            companyService.createCompany(companyDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "L'entreprise a été créée avec succès");
-            logger.info("Entreprise {} créée avec succès", companyDTO.getCompanyName());
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la création de l'entreprise {}", companyDTO.getCompanyName(), ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        companyService.createCompany(companyDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "L'entreprise a été créée avec succès");
+        logger.info("Entreprise {} créée avec succès", companyDTO.getCompanyName());
         
         return "redirect:/student/" + studentId;
     }
@@ -273,18 +243,11 @@ public class StudentProfileController {
             return "redirect:/student/" + studentId;
         }
 
-        try {
-            mentorService.createMentor(mentorDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Le mentor a été créé avec succès");
-            logger.info("Mentor {} {} créé avec succès", mentorDTO.getFirstName(), mentorDTO.getLastName());
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la création du mentor {} {}", 
-                mentorDTO.getFirstName(), mentorDTO.getLastName(), ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        mentorService.createMentor(mentorDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Le mentor a été créé avec succès");
+        logger.info("Mentor {} {} créé avec succès", mentorDTO.getFirstName(), mentorDTO.getLastName());
         
         return "redirect:/student/" + studentId;
     }
@@ -317,17 +280,11 @@ public class StudentProfileController {
             return "redirect:/student/" + studentId;
         }
 
-        try {
-            visitService.createVisit(visitDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "La visite a été créée avec succès");
-            logger.info("Visite créée avec succès pour l'étudiant {}", studentId);
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la création de la visite pour l'étudiant {}", studentId, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        visitService.createVisit(visitDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "La visite a été créée avec succès");
+        logger.info("Visite créée avec succès pour l'étudiant {}", studentId);
         
         return "redirect:/student/" + studentId;
     }
@@ -364,17 +321,11 @@ public class StudentProfileController {
             return "redirect:/student/" + studentId;
         }
 
-        try {
-            visitService.updateVisit(visitId, visitDTO);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "La visite a été mise à jour avec succès");
-            logger.info("Visite {} mise à jour avec succès", visitId);
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la mise à jour de la visite {}", visitId, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        visitService.updateVisit(visitId, visitDTO);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "La visite a été mise à jour avec succès");
+        logger.info("Visite {} mise à jour avec succès", visitId);
         
         return "redirect:/student/" + studentId;
     }
@@ -398,17 +349,11 @@ public class StudentProfileController {
             @Parameter(description = "ID de la visite à supprimer", required = true)
             @PathVariable Long visitId,
             RedirectAttributes redirectAttributes) {
-        try {
-            visitService.deleteVisit(visitId);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "La visite a été supprimée avec succès");
-            logger.info("Visite {} supprimée avec succès", visitId);
-            
-        } catch (ResponseStatusException ex) {
-            logger.error("Erreur lors de la suppression de la visite {}", visitId, ex);
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-        }
+        visitService.deleteVisit(visitId);
+        
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "La visite a été supprimée avec succès");
+        logger.info("Visite {} supprimée avec succès", visitId);
         
         return "redirect:/student/" + studentId;
     }

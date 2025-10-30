@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -48,17 +47,10 @@ public class ArchiveController {
     })
     @GetMapping
     public String getArchives(Model model) {
-        try {
-            List<StudentDTO> archivedStudents = studentService.getAllArchivedStudents();
-            model.addAttribute("archivedStudents", archivedStudents);
-            logger.info("Page des archives affichée avec {} étudiant(s) archivé(s)", archivedStudents.size());
-            return "archives";
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors de l'affichage de la page des archives", e);
-            model.addAttribute("archivedStudents", List.of());
-            model.addAttribute("errorMessage", e.getReason());
-            return "archives";
-        }
+        List<StudentDTO> archivedStudents = studentService.getAllArchivedStudents();
+        model.addAttribute("archivedStudents", archivedStudents);
+        logger.info("Page des archives affichée avec {} étudiant(s) archivé(s)", archivedStudents.size());
+        return "archives";
     }
 
     /**
@@ -78,16 +70,11 @@ public class ArchiveController {
             @Parameter(description = "ID de l'étudiant à supprimer définitivement", required = true)
             @PathVariable Long id, 
             RedirectAttributes redirectAttributes) {
-        try {
-            studentService.deleteStudent(id);
-            
-            logger.info("Étudiant supprimé avec succès");
-            redirectAttributes.addFlashAttribute("successMessage",
-                "L'étudiant a été supprimé définitivement");
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors de la suppression de l'étudiant avec l'ID : {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getReason());
-        }
+        studentService.deleteStudent(id);
+        
+        logger.info("Étudiant supprimé avec succès");
+        redirectAttributes.addFlashAttribute("successMessage",
+            "L'étudiant a été supprimé définitivement");
         
         return "redirect:/archives";
     }
@@ -109,16 +96,11 @@ public class ArchiveController {
             @Parameter(description = "ID de l'étudiant à désarchiver", required = true)
             @PathVariable Long id, 
             RedirectAttributes redirectAttributes) {
-        try {
-            studentService.unarchiveStudent(id);
-            
-            logger.info("Étudiant désarchivé avec succès");
-            redirectAttributes.addFlashAttribute("successMessage",
-                "L'étudiant a été désarchivé avec succès");
-        } catch (ResponseStatusException e) {
-            logger.error("Erreur lors du désarchivage de l'étudiant avec l'ID : {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getReason());
-        }
+        studentService.unarchiveStudent(id);
+        
+        logger.info("Étudiant désarchivé avec succès");
+        redirectAttributes.addFlashAttribute("successMessage",
+            "L'étudiant a été désarchivé avec succès");
         
         return "redirect:/archives";
     }

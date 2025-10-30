@@ -1,5 +1,7 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.DatabaseException;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.ResourceNotFoundException;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.CompanyDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.Company;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.entities.repository.CompanyRepository;
@@ -8,10 +10,8 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.CompanyServic
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -38,8 +38,8 @@ public class CompanyServiceImpl implements CompanyService {
             return companies.isEmpty() ? List.of() : companyMapper.toDTOList(companies);
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des entreprises", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la récupération des entreprises");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la récupération des entreprises", ex);
         }
     }
 
@@ -48,7 +48,7 @@ public class CompanyServiceImpl implements CompanyService {
         return companyMapper.toDTO(companyRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucune entreprise trouvée avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'entreprise avec l'identifiant %d est introuvable", id));
             }));
     }
@@ -66,8 +66,8 @@ public class CompanyServiceImpl implements CompanyService {
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la création de l'entreprise {}", 
                 companyDTO.getCompanyName(), ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la création de l'entreprise");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la création de l'entreprise", ex);
         }
     }
 
@@ -77,7 +77,7 @@ public class CompanyServiceImpl implements CompanyService {
         Company company = companyRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucune entreprise trouvée avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'entreprise avec l'identifiant %d est introuvable", id));
             });
         
@@ -93,8 +93,8 @@ public class CompanyServiceImpl implements CompanyService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la mise à jour de l'entreprise {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la mise à jour de l'entreprise");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la mise à jour de l'entreprise", ex);
         }
     }
 
@@ -104,7 +104,7 @@ public class CompanyServiceImpl implements CompanyService {
         Company company = companyRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucune entreprise trouvée avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'entreprise avec l'identifiant %d est introuvable", id));
             });
         
@@ -113,8 +113,8 @@ public class CompanyServiceImpl implements CompanyService {
             logger.info("Entreprise {} supprimée avec succès", id);
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la suppression de l'entreprise {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la suppression de l'entreprise");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la suppression de l'entreprise", ex);
         }
     }
 }

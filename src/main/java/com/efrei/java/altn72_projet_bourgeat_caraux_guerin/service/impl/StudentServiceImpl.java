@@ -1,5 +1,7 @@
 package com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.impl;
 
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.DatabaseException;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.exception.ResourceNotFoundException;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.SearchCriteriaDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.StudentDTO;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.dto.StudentUpdateDTO;
@@ -11,14 +13,13 @@ import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.enums.Program;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.mapper.SchoolYearMapper;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.model.mapper.StudentMapper;
 import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.service.StudentService;
+import com.efrei.java.altn72_projet_bourgeat_caraux_guerin.utils.AcademicYearUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -49,8 +50,8 @@ public class StudentServiceImpl implements StudentService {
             return students.isEmpty() ? List.of() : studentMapper.toDTOList(students);
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des étudiants", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la récupération des étudiants");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la récupération des étudiants", ex);
         }
     }
 
@@ -59,7 +60,7 @@ public class StudentServiceImpl implements StudentService {
         return studentMapper.toDTO(studentRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucun étudiant trouvé avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'étudiant avec l'identifiant %d est introuvable", id));
             }));
     }
@@ -87,13 +88,12 @@ public class StudentServiceImpl implements StudentService {
             
         } catch (DataIntegrityViolationException ex) {
             logger.error("Violation de contrainte d'unicité pour l'email : {}", studentDTO.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                String.format("L'adresse email '%s' est déjà utilisée", studentDTO.getEmail()));
+            throw ex;
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la création de l'étudiant {} {}",
                         studentDTO.getFirstName(), studentDTO.getLastName(), ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors de la création de l'étudiant");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la création de l'étudiant", ex);
         }
     }
 
@@ -107,7 +107,7 @@ public class StudentServiceImpl implements StudentService {
                 return "Aucun étudiant trouvé pour l'année " + currentAcademicYear;
             }
 
-            String nextAcademicYear = calculateNextAcademicYear(currentAcademicYear);
+            String nextAcademicYear = AcademicYearUtils.getNextAcademicYear(currentAcademicYear);
             int createdCount = 0;
             int archivedCount = 0;
             int alreadyHasNextYearCount = 0;
@@ -147,20 +147,9 @@ public class StudentServiceImpl implements StudentService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors du passage à la prochaine année académique", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Une erreur de base de données est survenue lors du passage à la prochaine année académique");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors du passage à la prochaine année académique", ex);
         }
-    }
-    
-    /**
-     * Calcule l'année académique suivante
-     * @param currentAcademicYear L'année académique actuelle (format: XXXX/XXXX)
-     * @return L'année académique suivante (format: XXXX/XXXX)
-     */
-    private String calculateNextAcademicYear(String currentAcademicYear) {
-        String[] years = currentAcademicYear.split("/");
-        int startYear = Integer.parseInt(years[0]);
-        return (startYear + 1) + "/" + (startYear + 2);
     }
     
     /**
@@ -268,8 +257,8 @@ public class StudentServiceImpl implements StudentService {
             return archivedStudents.isEmpty() ? List.of() : studentMapper.toDTOList(archivedStudents);
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la récupération des étudiants archivés", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la récupération des étudiants archivés");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la récupération des étudiants archivés", ex);
         }
     }
 
@@ -279,7 +268,7 @@ public class StudentServiceImpl implements StudentService {
         Student student = studentRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucun étudiant trouvé avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'étudiant avec l'identifiant %d est introuvable", id));
             });
         
@@ -288,8 +277,8 @@ public class StudentServiceImpl implements StudentService {
             logger.info("Étudiant supprimé : {} {}", student.getFirstName(), student.getLastName());
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la suppression de l'étudiant avec l'ID : {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la suppression de l'étudiant");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la suppression de l'étudiant", ex);
         }
     }
 
@@ -299,7 +288,7 @@ public class StudentServiceImpl implements StudentService {
         Student student = studentRepository.findById(id)
             .orElseThrow(() -> {
                 logger.error("Aucun étudiant trouvé avec l'ID : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'étudiant avec l'identifiant %d est introuvable", id));
             });
         
@@ -309,8 +298,8 @@ public class StudentServiceImpl implements StudentService {
             logger.info("Étudiant désarchivé : {} {}", student.getFirstName(), student.getLastName());
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors du désarchivage de l'étudiant avec l'ID : {}", id, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors du désarchivage de l'étudiant");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors du désarchivage de l'étudiant", ex);
         }
     }
 
@@ -332,8 +321,8 @@ public class StudentServiceImpl implements StudentService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la recherche des étudiants", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la recherche des étudiants");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la recherche des étudiants", ex);
         }
     }
 
@@ -352,20 +341,11 @@ public class StudentServiceImpl implements StudentService {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> {
                 logger.error("Aucun étudiant trouvé avec l'ID : {}", studentId);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                return new ResourceNotFoundException(
                     String.format("L'étudiant avec l'identifiant %d est introuvable", studentId));
             });
         
-        // Vérifier si l'email existe déjà (sauf pour cet étudiant)
-        if (dto.getEmail() != null && !dto.getEmail().equals(student.getEmail())) {
-            studentRepository.findByEmail(dto.getEmail()).ifPresent(existingStudent -> {
-                if (!existingStudent.getId().equals(studentId)) {
-                    logger.error("Violation de contrainte d'unicité pour l'email : {}", dto.getEmail());
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                        String.format("L'adresse email '%s' est déjà utilisée", dto.getEmail()));
-                }
-            });
-        }
+        // L'email sera vérifié par la contrainte de base de données
         
         try {
             student.setFirstName(dto.getFirstName());
@@ -379,8 +359,8 @@ public class StudentServiceImpl implements StudentService {
             
         } catch (DataAccessException ex) {
             logger.error("Erreur d'accès aux données lors de la mise à jour de l'étudiant avec l'ID : {}", studentId, ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Une erreur de base de données est survenue lors de la mise à jour de l'étudiant");
+            throw new DatabaseException(
+                "Une erreur de base de données est survenue lors de la mise à jour de l'étudiant", ex);
         }
     }
 }
