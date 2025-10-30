@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
       company: document.getElementById("searchCompany").value.trim() || null,
       missionKeyword:
         document.getElementById("searchMissionKeyword").value.trim() || null,
-      academicYear: document.getElementById("searchAcademicYear").value || null,
+      academicYear:
+        document.getElementById("searchAcademicYear").value.trim() || null,
     };
 
     searchLoading.classList.remove("d-none");
