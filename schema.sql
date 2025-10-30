@@ -84,13 +84,3 @@ CREATE TABLE visit (
     
     CONSTRAINT chk_format CHECK (format IN ('ONLINE', 'IN_PERSON'))
 );
-
-CREATE INDEX idx_mentor_company ON mentor(company_id);
-CREATE INDEX idx_schoolyear_student ON school_year(student_id);
-CREATE INDEX idx_schoolyear_mentor ON school_year(mentor_id);
-CREATE INDEX idx_schoolyear_company ON school_year(company_id);
-CREATE INDEX idx_visit_schoolyear ON visit(school_year_id);
-CREATE INDEX idx_student_email ON student(email);
-CREATE INDEX idx_student_archived ON student(is_archived);
-CREATE INDEX idx_company_name ON company(company_name);
-CREATE INDEX idx_user_username ON app_user(username);
