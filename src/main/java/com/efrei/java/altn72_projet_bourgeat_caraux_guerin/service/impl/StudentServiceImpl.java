@@ -304,6 +304,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<StudentDTO> searchStudents(SearchCriteriaDTO criteria) {
         try {
             logger.info("Recherche d'étudiants avec les critères : nom={}, entreprise={}, mission={}, année={}",
@@ -315,6 +316,8 @@ public class StudentServiceImpl implements StudentService {
                     nullIfEmpty(criteria.getMissionKeyword()),
                     nullIfEmpty(criteria.getAcademicYear())
             );
+            
+            students.forEach(student -> student.getSchoolYears().size());
             
             logger.info("Recherche terminée : {} étudiant(s) trouvé(s)", students.size());
             return students.isEmpty() ? List.of() : studentMapper.toDTOList(students);

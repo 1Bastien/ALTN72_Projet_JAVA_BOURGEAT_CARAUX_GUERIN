@@ -1,0 +1,10 @@
+Projet Java ALTN72 - Bastien BOURGEAT - Ghislain CARAUX - Nam GUERIN
+LSI 1 APP 2 Promo 2027
+
+Voici le lien github de notre projet :
+https://github.com/1Bastien/ALTN72_Projet_JAVA_BOURGEAT_CARAUX_GUERIN
+
+https://github.com/1Bastien/ALTN72_Projet_JAVA_BOURGEAT_CARAUX_GUERIN.git
+
+ou via SSH :
+git@github.com:1Bastien/ALTN72_Projet_JAVA_BOURGEAT_CARAUX_GUERIN.git

@@ -20,11 +20,9 @@ Nous avons utilisé **IntelliJ IDEA** pour le développement de l'application.
 
 ### 2.2 Système de Gestion de Base de Données
 
-En développement local : **MariaDB 10.4.28**
+En développement et en production : **PostgreSQL 16**
 
-En production : **PostgreSQL 16** pour Render.com
-
-Le choix de PostgreSQL en production a été fait pour profiter de l'offre gratuite de Render.com qui fournit une base de données persistante.
+Le choix de PostgreSQL pour l'ensemble du projet assure une cohérence entre les environnements de développement et de production, et permet de profiter de l'offre gratuite de Render.com qui fournit une base de données persistante.
 
 ## 3. Instructions pour Lancer et Tester l'Application
 
@@ -32,13 +30,16 @@ Le choix de PostgreSQL en production a été fait pour profiter de l'offre gratu
 
 - Java 17
 - Maven 3.6+
-- MariaDB 10.4+ (en local)
+- PostgreSQL 16+
 
 ### 3.2 Configuration de la Base de Données
 
-1. Créez une base de données MariaDB nommée `projet_java`
-2. Exécutez le script SQL fourni dans `schema.sql` si nécessaire
-3. Vérifiez les paramètres de connexion dans `src/main/resources/application.properties`
+1. Créez une base de données PostgreSQL nommée `projet_java`
+2. Assurez-vous qu'un utilisateur PostgreSQL a accès à cette base (par défaut : `projet_java_user` / mot de passe : `password`)
+3. Les tables seront automatiquement créées au premier démarrage grâce à Hibernate
+4. Les données de test seront automatiquement initialisées grâce à `DataInitializer`
+
+**Note :** Vous pouvez modifier les paramètres de connexion dans `src/main/resources/application.properties` si nécessaire.
 
 ### 3.3 Lancement de l'Application
 
@@ -84,46 +85,48 @@ Nous souhaitons mettre en avant plusieurs points :
 
 1. **Architecture en couches bien structurée** : Nous avons respecté une séparation claire entre les contrôleurs, les services, les repositories et les DTOs. Notamment avec l'utilisation des interfaces.
 
-2. **Gestion complète du cycle de vie des étudiants** : L'application gère non seulement les étudiants actifs, mais aussi leur archivage, avec un historique complet de leurs années scolaires, missions, rapports et visites.
-
-3. **Fonctionnalité de recherche avancée** : Nous avons implémenté une recherche multicritères permettant de filtrer les étudiants par nom, entreprise, mots-clés de mission et année académique.
-
-4. **Interface utilisateur moderne et responsive** : L'interface utilise un design moderne avec une navigation intuitive, des formulaires bien structurés et des éléments visuels clairs.
+2. **Interface utilisateur moderne**
 
 ### b) Quelle est la plus grande difficulté que vous avez rencontrée ?
 
-La plus grande difficulté a été la gestion des relations bidirectionnelles entre les entités JPA, notamment entre `Student`, `SchoolYear`, et les différentes entités liées (`Company`, `Mentor`, `Visit`).
+La plus grande difficulté a été de concevoir une architecture de base de données adaptée à notre besoin métier. Au départ, nous envisagions de créer une table par section du fichier Excel fourni dans le sujet (une table pour les missions, une pour les rapports, une pour les présentations, etc.), ce qui aurait conduit à une structure fragmentée avec de nombreuses relations complexes entre tables.
 
-Pour solutionner ce problème, nous avons :
+Cependant, après réflexion et analyse du domaine, l'idée de centraliser toutes ces informations dans une entité `SchoolYear` (année scolaire) nous est apparue comme une solution bien plus élégante. Cette approche présente plusieurs avantages :
 
-1. Utilisé les annotations `@JsonIgnore` et `@JsonBackReference` pour éviter les boucles infinies lors de la sérialisation JSON
-2. Mis en place des DTOs avec MapStruct pour contrôler précisément quelles données sont exposées par l'API
-3. Ajouté des requêtes JPQL avec `LEFT JOIN FETCH` pour optimiser le chargement des relations et éviter le problème N+1
-4. Utilisé `@Transactional` de manière stratégique pour gérer les opérations en cascade lors de la création et modification des entités
+1. **Centralisation naturelle** : Une année scolaire regroupe logiquement toutes les informations d'un étudiant pour une année donnée (mission, rapport, présentation, visites, entreprise, etc.)
+2. **Évolutivité** : Un étudiant peut facilement avoir plusieurs années scolaires, permettant de suivre son parcours complet
+3. **Simplicité des relations** : Au lieu d'avoir de multiples relations entre `Student` et chaque entité (Mission, Report, Presentation), nous avons une seule relation `Student` → `SchoolYear` qui contient tout
+4. **Cohérence métier** : Cette modélisation reflète mieux la réalité : chaque année scolaire est une entité cohérente avec ses propres caractéristiques
+
+Cette décision architecturale, bien que difficile à prendre initialement, s'est révélée être la clé d'une application maintenable et extensible.
 
 ### c) Quelle a été la contribution de chaque membre de l'équipe ?
 
 **BOURGEAT Bastien :**
 
 - Mise en place de l'architecture de base (entités, repositories, services)
-- Implémentation de la sécurité avec Spring Security
+
 - Configuration du déploiement sur Render.com
 - Gestion des exceptions et des réponses HTTP
 - Implémentation des tests unitaires
-
-**CARAUX :**
-
-- Développement des contrôleurs et de la logique métier
 - Création des DTOs et des mappers avec MapStruct
+- Création de la logique métier
+- Mise en place des bonnes pratiques et vérification de la qualité du code
+
+**CARAUX Ghislain :**
+
 - Implémentation des fonctionnalités de recherche et de filtrage
 - Documentation du code
+- Intégration des templates HTML/CSS
+- Création de la logique métier
 
-**GUERIN :**
+**GUERIN Nam :**
 
 - Développement de l'interface utilisateur avec Thymeleaf
+- Implémentation de la sécurité avec Spring Security
 - Intégration des templates HTML/CSS
 - Création des formulaires et validation côté client
-- Tests fonctionnels de l'interface
+- Création de la logique métier
 
 ### d) Si vous deviez retenir trois points de ce cours en général et de ce projet en particulier, quels seraient ces trois points ?
 
@@ -131,7 +134,7 @@ Pour solutionner ce problème, nous avons :
 
 2. **La puissance de Spring Boot et de son écosystème** : Spring Boot simplifie énormément le développement d'applications d'entreprise. La configuration automatique, l'injection de dépendances et l'intégration avec JPA, Security, et Thymeleaf permettent de se concentrer sur la logique métier plutôt que sur la configuration.
 
-3. **L'importance des bonnes pratiques de gestion d'erreurs** : Une gestion d'erreurs appropriée améliore considérablement l'expérience utilisateur. L'utilisation de `ResponseStatusException` avec des messages personnalisés en français permet de fournir des retours clairs et compréhensibles.
+3. **L'importance des bonnes pratiques de gestion d'erreurs** : Une gestion d'erreurs appropriée améliore considérablement l'expérience utilisateur. L'utilisation d'un gestionnaire global avec `@ControllerAdvice` et des exceptions personnalisées permet de fournir des retours clairs et compréhensibles en français, tout en gérant de manière appropriée les redirections avec messages flash pour l'interface web.
 
 ### e) Les fonctionnalités que vous n'avez pas eu le temps de mettre en œuvre et pourquoi
 
@@ -142,8 +145,6 @@ Plusieurs fonctionnalités auraient pu être ajoutées avec plus de temps :
 2. **Système de gestion des rôles avancé** : Actuellement, tous les utilisateurs authentifiés ont les mêmes droits. Il aurait été intéressant d'implémenter différents rôles (administrateur, tuteur simple) avec des permissions différentes.
 
 3. **Upload de fichiers** : Permettre aux étudiants d'uploader leurs rapports directement dans l'application. Cette fonctionnalité a été mise de côté par manque de temps et pour éviter les problèmes de stockage en production.
-
-4. **Tableau de bord avec statistiques avancées** : Des graphiques plus élaborés (évolution des notes, répartition géographique des entreprises, etc.) auraient pu enrichir le tableau de bord.
 
 ### f) À quel niveau, dans votre projet, avez-vous réussi à respecter entièrement ou partiellement les principes SOLID ?
 
@@ -191,6 +192,7 @@ L'application utilise Spring Boot 3.5.6 avec les starters suivants :
 - `spring-boot-starter-thymeleaf` pour les vues
 - `spring-boot-starter-security` pour l'authentification
 - `spring-boot-starter-validation` pour la validation des données
+- `spring-boot-starter-actuator` pour le monitoring et la supervision
 
 ### 5.2 Stack Technique
 
@@ -198,54 +200,80 @@ La stack utilisée est identique à celle du TP fil rouge :
 
 - **Backend :** Spring Boot, Spring Data JPA, Spring Security
 - **Frontend :** Thymeleaf, Bootstrap, JavaScript
-- **Base de données :** MariaDB (dev) / PostgreSQL (prod)
+- **Base de données :** PostgreSQL
 - **Build :** Maven
 - **Tests :** JUnit 5, Mockito
+- **Monitoring :** Spring Boot Actuator
 - **Autres :** Lombok, MapStruct, SpringDoc OpenAPI
 
 ### 5.3 Documentation API avec Swagger
 
 La documentation API est disponible via SpringDoc OpenAPI (Swagger UI). La configuration se trouve dans `OpenApiConfig.java`. L'interface Swagger est accessible à l'adresse `/swagger-ui.html`.
 
+Dans notre application, Swagger sert uniquement de documentation et non d'outil de test. En effet, nos contrôleurs sont annotés avec `@Controller` (et non `@RestController`) car ils retournent des vues Thymeleaf. Les endpoints documentés par Swagger sont donc principalement utilisés en arrière-plan par l'interface web, et ne peuvent pas être testés directement via l'interface Swagger UI de manière fonctionnelle (les retours sont des redirections vers des pages HTML plutôt que du JSON pur).
+
 ### 5.4 Déploiement
 
-L'application est déployée sur **Render.com** grâce au fichier de configuration `render.yaml`. Elle utilise :
-
-- Un service web avec Docker (défini dans `Dockerfile`)
-- Une base de données PostgreSQL gratuite
-- Une configuration de production dans `application-prod.properties`
+L'application est déployée sur Render.com et accessible à l'adresse : [https://altn72-projet-java-app.onrender.com](https://altn72-projet-java-app.onrender.com)
 
 ### 5.5 Gestion des Exceptions
 
-Nous avons choisi d'utiliser **ResponseStatusException** plutôt que `@ControllerAdvice` parce que chaque exception est levée avec un message spécifique en français
+Nous avons implémenté une gestion globale des exceptions avec **@ControllerAdvice** (`GlobalExceptionHandler`) qui gère :
 
-#### 5.6 Requête SQL Native - Analyse Critique
+- **ResourceNotFoundException** : Ressources introuvables (404)
+- **DatabaseException** : Erreurs de base de données (500)
+- **DataIntegrityViolationException** : Violations de contraintes d'intégrité
 
-Nous avons utilisé une requête SQL native dans `SchoolYearRepository` :
+Le gestionnaire distingue les requêtes de gestion (qui sont redirigées avec un message flash) des autres requêtes (qui lèvent une `ResponseStatusException`). Les messages d'erreur sont personnalisés en français selon le contexte (email dupliqué, suppression impossible, etc.).
+
+### 5.6 Requêtes JPQL et SQL Natives - Analyse Critique
+
+#### Utilisation de JPQL
+
+Dans `SchoolYearRepository`, nous privilégions JPQL pour la portabilité :
 
 ```java
-@Query(value = "SELECT DISTINCT academic_year FROM school_year ORDER BY academic_year DESC", nativeQuery = true)
+@Query("SELECT DISTINCT sy.academicYear FROM SchoolYear sy ORDER BY sy.academicYear DESC")
 List<String> findDistinctAcademicYearByOrderByAcademicYearDesc();
+```
+
+#### Utilisation de SQL Native
+
+Pour les requêtes complexes de recherche multi-critères dans `StudentRepository`, nous utilisons du SQL natif :
+
+```java
+@Query(value = """
+    SELECT DISTINCT s.*
+    FROM student s
+    LEFT JOIN school_year sy ON s.id = sy.student_id
+    LEFT JOIN company c ON c.id = sy.company_id
+    WHERE (s.is_archived IS NULL OR s.is_archived = false)
+      AND (:name IS NULL OR LOWER(s.last_name) LIKE LOWER(CONCAT('%', :name, '%')))
+      AND (:company IS NULL OR (c.id IS NOT NULL AND LOWER(c.company_name) LIKE LOWER(CONCAT('%', :company, '%'))))
+      AND (:missionKeyword IS NULL OR LOWER(COALESCE(sy.keywords, '')) LIKE LOWER(CONCAT('%', :missionKeyword, '%')))
+      AND (:academicYear IS NULL OR (sy.id IS NOT NULL AND sy.academic_year = :academicYear))
+""", nativeQuery = true)
+List<Student> searchStudents(...);
 ```
 
 **Analyse critique :**
 
-**Avantages :**
+**Avantages du SQL natif :**
 
-- Performance optimale pour cette requête simple
-- Plus concise que l'équivalent JPQL
-- Évite de charger des objets complets quand on a juste besoin d'une colonne
+- Performance optimale pour les requêtes complexes avec plusieurs LEFT JOIN
+- Permet l'utilisation de fonctions SQL spécifiques (COALESCE, CONCAT)
+- Plus lisible pour les requêtes de recherche complexes
 
 **Inconvénients :**
 
 - Perte de la portabilité entre SGBD
 - Pas de vérification de type à la compilation
-- Si la structure de la table change (nom de colonne), le code ne sera pas mis à jour automatiquement par les outils de refactoring
+- Nécessite une attention particulière lors des changements de schéma
 
 **Conclusion :**
-Pour la majorité des cas, JPQL reste préférable car il offre une meilleure maintenabilité et portabilité.
+Nous utilisons JPQL par défaut pour sa portabilité et sa maintenabilité. Le SQL natif est réservé aux cas spéciaux, par exemple des entreprise qui ont des requete bien définie qui ne peuvent pas se permettre de tout changer en jpql.
 
-#### c) Utilisation de @Transactional
+### 5.7 Utilisation de @Transactional
 
 Nous avons utilisé `@Transactional` dans les services, principalement pour :
 
@@ -256,6 +284,46 @@ Nous avons utilisé `@Transactional` dans les services, principalement pour :
 - **Lazy Loading** : Permet le chargement des relations à la demande dans les méthodes de service
 
 - Nous n'avons pas annoté les méthodes de lecture simple avec `@Transactional` parce que Spring le fait déjà implicitement.
+
+La méthode `searchStudents()` utilise `@Transactional(readOnly = true)` malgré qu'elle soit une lecture. Ceci est nécessaire car notre requête SQL native ne charge pas automatiquement les collections lazy (`schoolYears`). La transaction garde la session Hibernate ouverte, permettant le chargement explicite de ces collections avant la conversion en DTO.
+
+### 5.8 Initialisation des Données
+
+Nous avons implémenté un système d'initialisation automatique des données (`DataInitializer`) qui :
+
+- Crée un utilisateur de test au premier démarrage
+- Génère des fixtures réalistes (12 étudiants, 5 entreprises, 11 mentors)
+- Initialise des années scolaires avec missions, rapports et visites
+- Permet de tester l'application immédiatement après le premier lancement
+
+Ce système utilise un `CommandLineRunner` qui s'exécute uniquement si la base de données est vide, évitant ainsi la duplication des données lors des redémarrages.
+
+## 6. Architecture et Qualité du Code
+
+### 6.1 Séparation des Responsabilités
+
+Le projet respecte une architecture en couches stricte :
+
+- **Contrôleurs** (`controler/`) : Gestion des requêtes HTTP
+- **Services** (`service/` et `service/impl/`) : Logique métier
+- **Repositories** (`model/entities/repository/`) : Accès aux données
+- **DTOs** (`model/dto/`) : Objets de transfert de données
+- **Mappers** (`model/mapper/`) : Conversion entre entités et DTOs
+- **Exceptions** (`exception/`) : Gestion centralisée des erreurs
+
+### 6.2 Tests Unitaires
+
+L'application dispose de tests unitaires pour tous les services :
+
+- `CompanyServiceImplTest`
+- `DashboardServiceImplTest`
+- `MentorServiceImplTest`
+- `SchoolYearServiceImplTest`
+- `StudentProfileServiceImplTest`
+- `StudentServiceImplTest`
+- `VisitServiceImplTest`
+
+Les tests utilisent Mockito pour mocker les dépendances et JUnit 5 pour l'exécution.
 
 ## 7. Conclusion
 
