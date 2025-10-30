@@ -27,9 +27,11 @@ public class DatabaseConfig {
         String databaseUrl = System.getenv("DATABASE_URL");
         
         if (databaseUrl != null && !databaseUrl.isEmpty()) {
-            String jdbcUrl = convertRenderUrlToJdbc(databaseUrl);
-            properties.setUrl(jdbcUrl);
+            parseAndSetDatabaseUrl(databaseUrl, properties);
         }
+        
+        // Définir explicitement le driver PostgreSQL
+        properties.setDriverClassName("org.postgresql.Driver");
         
         return properties;
     }
@@ -41,13 +43,14 @@ public class DatabaseConfig {
     }
 
     /**
-     * Convertit une URL Render PostgreSQL en URL JDBC
+     * Parse l'URL Render PostgreSQL et configure les propriétés de la DataSource
      * Input:  postgresql://user:pass@host:port/db
-     * Output: jdbc:postgresql://host:port/db?user=user&password=pass
      */
-    private String convertRenderUrlToJdbc(String renderUrl) {
+    private void parseAndSetDatabaseUrl(String renderUrl, DataSourceProperties properties) {
+        // Si c'est déjà une URL JDBC, l'utiliser directement
         if (renderUrl.startsWith("jdbc:")) {
-            return renderUrl;
+            properties.setUrl(renderUrl);
+            return;
         }
 
         if (renderUrl.startsWith("postgresql://") || renderUrl.startsWith("postgres://")) {
@@ -55,15 +58,20 @@ public class DatabaseConfig {
             
             String[] parts = urlWithoutProtocol.split("@", 2);
             if (parts.length == 2) {
+                // Extraire les credentials
                 String[] credentials = parts[0].split(":", 2);
-                String user = credentials[0];
+                String username = credentials[0];
                 String password = credentials.length > 1 ? credentials[1] : "";
                 
-                return "jdbc:postgresql://" + parts[1] + "?user=" + user + "&password=" + password;
+                // Construire l'URL JDBC sans les credentials dans l'URL
+                String jdbcUrl = "jdbc:postgresql://" + parts[1];
+                
+                // Configurer les propriétés séparément
+                properties.setUrl(jdbcUrl);
+                properties.setUsername(username);
+                properties.setPassword(password);
             }
         }
-
-        return renderUrl;
     }
 }
 
