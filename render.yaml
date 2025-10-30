@@ -1,0 +1,53 @@
+services:
+  # Base de données MariaDB
+  - type: pserv
+    name: altn72-db
+    env: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile.mariadb
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: projet_java
+      - key: MYSQL_USER
+        value: appuser
+      - key: MYSQL_PASSWORD
+        generateValue: true
+    disk:
+      name: mariadb-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1
+
+  # Application Spring Boot
+  - type: web
+    name: altn72-app
+    env: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: altn72-db
+          envVarKey: DATABASE_URL
+      - key: DB_USERNAME
+        fromService:
+          type: pserv
+          name: altn72-db
+          envVarKey: MYSQL_USER
+      - key: DB_PASSWORD
+        fromService:
+          type: pserv
+          name: altn72-db
+          envVarKey: MYSQL_PASSWORD
+      - key: DB_NAME
+        value: projet_java
+      - key: JAVA_OPTS
+        value: -Xmx512m -Xms256m
+    healthCheckPath: /actuator/health
+

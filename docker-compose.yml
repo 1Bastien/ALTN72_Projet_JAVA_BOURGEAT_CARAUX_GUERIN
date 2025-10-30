@@ -1,0 +1,48 @@
+# Docker Compose pour tester localement avant le déploiement sur Render
+version: '3.8'
+
+services:
+  # Base de données MariaDB
+  mariadb:
+    image: mariadb:11.2
+    container_name: altn72-db-local
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: projet_java
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Application Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: altn72-app-local
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_NAME: projet_java
+      DB_USERNAME: appuser
+      DB_PASSWORD: apppass
+      JAVA_OPTS: -Xmx512m -Xms256m
+    ports:
+      - "8080:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:
+    driver: local
+
